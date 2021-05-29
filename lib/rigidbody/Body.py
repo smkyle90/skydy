@@ -4,6 +4,10 @@ import numpy as np
 import sympy as sym
 from sympy.physics.mechanics import dynamicsymbols
 
+from ..inertia import InertiaMatrix, MassMatrix
+from .BodyCoordinate import BodyCoordinate
+from .BodyForce import BodyForce, BodyTorque
+
 
 class Body:
     id_counter = 0
@@ -25,9 +29,10 @@ class Body:
         self.shape = shape
         self.dims = BodyCoordinate(self.name, length, width, height)
 
-        self.mass = mass
         # Inertial Properties
-        self.mass_matrix, self.inertia_matrix = self.__init_inertial_props()
+        self.mass = mass
+        self.mass_matrix = MassMatrix(self.name)
+        self.inertia_matrix = InertiaMatrix(self.name)
 
         # Position and velocity variables
         self.q, self.v = self.__init_symbols()
@@ -45,16 +50,6 @@ class Body:
 
     def is_absolute(self):
         return self.__abs
-
-    def __init_inertial_props(self):
-        mass_symbol = sym.Symbol("m_{}".format(self.name))
-        ax = ["x", "y", "z"]
-        inertia_matrix = [["I_{}{}_{}".format(a, b, self.name) for a in ax] for b in ax]
-
-        mass_matrix = sym.eye(3) * mass_symbol
-        inertia_matrix = sym.Matrix(inertia_matrix)
-
-        return mass_matrix, inertia_matrix
 
     def __init_symbols(self):
         q = ["x_G", "y_G", "z_G", "theta_x", "theta_y", "theta_z"]
@@ -94,13 +89,13 @@ class Body:
     def kinetic_energy(self):
         # Define the kinetic energy of the system
         v_body, w_body = self.body_twists(self.r_body, self.R_body)
-        KE_tr = sym.simplify((1 / 2) * v_body.T @ self.mass_matrix @ v_body)
-        KE_ro = sym.simplify((1 / 2) * w_body.T @ self.inertia_matrix @ w_body)
+        KE_tr = sym.simplify((1 / 2) * v_body.T @ self.mass_matrix.as_mat() @ v_body)
+        KE_ro = sym.simplify((1 / 2) * w_body.T @ self.inertia_matrix.as_mat() @ w_body)
         return KE_tr[0] + KE_ro[0]
 
     def potential_energy(self, gravity):
         g = sym.Symbol("g")
-        return self.mass_matrix[0, 0] * g * self.r_body.dot(gravity)
+        return self.mass_matrix.as_mat()[0, 0] * g * self.r_body.dot(gravity)
 
     def add_force(self, linear_force):
         assert isinstance(linear_force, BodyForce)
@@ -127,63 +122,6 @@ class Body:
         self.r_body = self.__r_body_free.copy()
         self.R_body = self.__R_body_free.copy()
         self.__constrained_state = [False for val in self.q]
-
-
-class BodyCoordinate:
-    def __init__(self, name, x=0, y=0, z=0):
-        self.name = name
-        self.properties = {
-            "x": x,
-            "y": y,
-            "z": z,
-        }
-        self.__symbols = sym.Matrix(
-            [
-                sym.Symbol("l_{}_{}".format(self.name, k)) if v else 0
-                for k, v in self.properties.items()
-            ]
-        )
-
-    def symbols(self):
-        return self.__symbols
-
-    def values(self):
-        return np.array(list(self.properties.values()))
-
-
-class BodyForce:
-    def __init__(
-        self, name, location, x_dir=False, y_dir=False, z_dir=False, prefix="F"
-    ):
-        self.name = str(name)
-        self.location = location
-        ax = ["x", "y", "z"]
-        direction = [x_dir, y_dir, z_dir]
-        self.direction = sym.Matrix(
-            [
-                sym.Symbol("{}_{}_{}".format(prefix, self.name, a)) if f else 0
-                for a, f in zip(ax, direction)
-            ]
-        )
-
-    @property
-    def location(self):
-        return self._location
-
-    @location.setter
-    def location(self, val):
-        self._location = val
-        # if val is None:
-        #     self._location = val
-        # elif isinstance(val, BodyCoordinate):
-        #     self._location = val
-        # else:
-        #     raise TypeError("Force location must be a BodyCoordinate (force) or None (torque).")
-
-
-class BodyTorque(BodyForce):
-    def __init__(self, name, x_dir=False, y_dir=False, z_dir=False, prefix="T"):
-        super().__init__(name, None, x_dir, y_dir, z_dir, prefix)
 
 
 # l = 2

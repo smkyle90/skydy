@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import copy
 
-from .rigid_body import Body
+from ..rigid_body import Body, BodyCoordinate
 
 # import numpy as np
 
@@ -47,6 +47,24 @@ class Joint:
         self.body_out_coord = body_out_coord
 
     @property
+    def body_in_coord(self):
+        return self._body_in_coord
+
+    @body_in_coord.setter
+    def body_in_coord(self, val):
+        assert isinstance(val, BodyCoordinate)
+        self._body_in_coord = val
+
+    @property
+    def body_out_coord(self):
+        return self._body_out_coord
+
+    @body_out_coord.setter
+    def body_out_coord(self, val):
+        assert isinstance(val, BodyCoordinate)
+        self._body_out_coord = val
+
+    @property
     def dof(self):
         return self._dof
 
@@ -89,3 +107,12 @@ class Connection:
     def body_out(self, val):
         assert isinstance(val, Body)
         self._body_out = val
+
+    @property
+    def joint(self):
+        return self._joint
+
+    @body_out.setter
+    def body_out(self, val):
+        assert isinstance(val, Joint)
+        self._joint = val

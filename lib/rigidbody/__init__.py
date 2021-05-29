@@ -1,1 +1,3 @@
-from .rigid_body import Body, BodyCoordinate, BodyForce, BodyTorque
+from .Body import Body
+from .BodyCoordinate import BodyCoordinate
+from .BodyForce import BodyForce, BodyTorque

@@ -209,7 +209,7 @@ class MultiBody:
     def as_latex(self, linearized=False):
 
         # Forward Kinematic Maps
-        maps = [
+        _maps = [
             "\\PI_{} = \\left({}, {}\\right)".format(
                 body.name, body.r_body, body.R_body
             )
@@ -219,12 +219,12 @@ class MultiBody:
         # Lagrangian
         T = sym.latex(self.kinetic_energy)
         V = sym.latex(self.potential_energy)
-        energy_eq = "L = " + T + V
+        _energy_eq = "L = " + T + V
 
         # Equations of motion
         A, B = self.system_matrices(linearized)
         if linearized:
-            eoms = (
+            _eoms = (
                 sym.latex(self.__l)
                 + " = "
                 + sym.latex(A)
@@ -234,7 +234,7 @@ class MultiBody:
                 + sym.latex(self.__u)
             )
         else:
-            eoms = (
+            _eoms = (
                 sym.latex(self.__l) + " = " + sym.latex(sym.simplify(A + B @ self.__u))
             )
 

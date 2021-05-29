@@ -1,1 +1,1 @@
-from .multi_body import MultiBody
+from .MultiBody import MultiBody
