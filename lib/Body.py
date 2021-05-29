@@ -2,7 +2,7 @@ import copy
 
 import numpy as np
 import sympy as sym
-from sympy.physics.mechanics import dynamicsymbols, init_vprinting
+from sympy.physics.mechanics import dynamicsymbols
 
 
 class Body:
@@ -259,7 +259,7 @@ class MultiBody:
         self._connections = val
 
     def __forward_kinematics(self):
-        for i, cnx in enumerate(self.connections):
+        for cnx in self.connections:
             for dof in cnx.joint.dof:
                 if dof.free:
                     self.coordinates.append(cnx.body_out.q[dof.idx])
