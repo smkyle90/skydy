@@ -12,7 +12,7 @@ class Body:
 
         # Denote if the velocity is absolute. By default, as it is a body,
         # is a relative velocity.
-        self.__lbs = False
+        self.__abs = False
 
         # Body accounting
         self.body_id = Body.id_counter
@@ -34,7 +34,6 @@ class Body:
 
         # Free body state and velocities
         self.__r_body_free, self.__R_body_free = self.__free_body_configuration()
-        # self.__v_body_free, self.__w_body_free = self.body_twists(self.__r_body_free, self.__R_body_free)
 
         self.r_body, self.R_body = None, None
 
@@ -45,7 +44,7 @@ class Body:
         self.linear_torques = []
 
     def is_absolute(self):
-        return self.__lbs
+        return self.__abs
 
     def __init_inertial_props(self):
         mass_symbol = sym.Symbol("m_{}".format(self.name))
