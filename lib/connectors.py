@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 import copy
 
-import numpy as np
-
 from .rigid_body import Body
+
+# import numpy as np
+
 
 # import sympy as sym
 
