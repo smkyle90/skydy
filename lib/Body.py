@@ -48,8 +48,6 @@ class Body:
         return self.__lbs
 
     def __init_inertial_props(self):
-        g = sym.Symbol("g")
-
         mass_symbol = sym.Symbol("m_{}".format(self.name))
         ax = ["x", "y", "z"]
         inertia_matrix = [["I_{}{}_{}".format(a, b, self.name) for a in ax] for b in ax]
@@ -89,9 +87,10 @@ class Body:
         return v_body, omega_body
 
     def body_velocity(self, point_on_body):
-        pob = np.array(point_on_body).reshape(-1,).tolist()
-        pob = sym.Matrix(pob)
-        return self.v_body + self.w_body.cross(pob)
+        point_on_body = np.array(point_on_body).reshape(-1,).tolist()
+        point_on_body = sym.Matrix(point_on_body)
+        v_body, w_body = self.body_twists(self.r_body, self.R_body)
+        return v_body + w_body.cross(point_on_body)
 
     def kinetic_energy(self):
         # Define the kinetic energy of the system
