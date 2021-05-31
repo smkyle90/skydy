@@ -16,6 +16,7 @@
 *.zip
 *.json
 *.mpg
+*.egg
 
 # Pytest Artifacts
 .pytest_cache
@@ -29,6 +30,7 @@ __pycache__
 # Store all dev files here.
 # Anything in this file will NOT be uploaded to the git repo, and ignored in the Docker build.
 workspace/*
+dist/*
 
 # Do not ignore
 !requirements.txt
