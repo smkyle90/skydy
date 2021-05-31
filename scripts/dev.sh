@@ -1,4 +1,4 @@
-CONTAINER_NAME=holdings
+CONTAINER_NAME=pydy
 
 xhost +local:
 
@@ -8,5 +8,4 @@ sudo docker run -it --privileged --rm \
   -e DISPLAY=$DISPLAY \
   -v $(pwd):/app:rw \
   --name=${CONTAINER_NAME} \
-  ${CONTAINER_NAME}:latest \
-  /bin/bash
+  ${CONTAINER_NAME}:latest

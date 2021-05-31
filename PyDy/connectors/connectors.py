@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import copy
 
-from ..rigid_body import Body, BodyCoordinate
+from ..rigidbody import Body, BodyCoordinate
 
 # import numpy as np
 
@@ -112,7 +112,7 @@ class Connection:
     def joint(self):
         return self._joint
 
-    @body_out.setter
-    def body_out(self, val):
+    @joint.setter
+    def joint(self, val):
         assert isinstance(val, Joint)
         self._joint = val

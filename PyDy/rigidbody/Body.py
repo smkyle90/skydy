@@ -12,11 +12,11 @@ from .BodyForce import BodyForce, BodyTorque
 class Body:
     id_counter = 0
 
-    def __init__(self, mass, length=0, width=0, height=0, shape="rod", name=None):
-
-        # Denote if the velocity is absolute. By default, as it is a body,
-        # is a relative velocity.
-        self.__abs = False
+    def __init__(self, name=None):
+        # mass=0, length=0, width=0, height=0, shape="rod"
+        # self.shape = shape
+        # self.mass = mass
+        # self.dims = BodyCoordinate(self.name, length, width, height)
 
         # Body accounting
         self.body_id = Body.id_counter
@@ -26,11 +26,7 @@ class Body:
         else:
             self.name = str(name)
 
-        self.shape = shape
-        self.dims = BodyCoordinate(self.name, length, width, height)
-
         # Inertial Properties
-        self.mass = mass
         self.mass_matrix = MassMatrix(self.name)
         self.inertia_matrix = InertiaMatrix(self.name)
 
@@ -47,9 +43,6 @@ class Body:
 
         self.linear_forces = []
         self.linear_torques = []
-
-    def is_absolute(self):
-        return self.__abs
 
     def __init_symbols(self):
         q = ["x_G", "y_G", "z_G", "theta_x", "theta_y", "theta_z"]

@@ -27,6 +27,7 @@ class MultiBody:
         self.kinetic_energy = 0
         self.potential_energy = 0
         self.G = 0
+
         self.eom = None
         self.gen_forces = None
         self.__l = None
