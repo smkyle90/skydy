@@ -5,8 +5,9 @@ import sympy as sym
 from sympy.physics.mechanics import dynamicsymbols
 
 from ..inertia import InertiaMatrix, MassMatrix
-from .BodyCoordinate import BodyCoordinate
 from .BodyForce import BodyForce, BodyTorque
+
+# from .BodyCoordinate import BodyCoordinate
 
 
 class Body:
