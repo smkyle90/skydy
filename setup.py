@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="PyDy",
+    name="skydy",
     version="0.0.1",
     author="Scott Kyle",
     author_email="scott.m.kyle@gmail.com",
@@ -20,7 +20,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "PyDy"},
-    packages=setuptools.find_packages(where="PyDy"),
+    package_dir={"": "skydy"},
+    packages=setuptools.find_packages(where="skydy"),
     python_requires=">=3.6",
+    install_requires=["numpy", "sympy",],
 )

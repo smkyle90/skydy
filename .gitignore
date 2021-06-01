@@ -18,6 +18,9 @@
 *.mpg
 *.egg
 
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+
 # Pytest Artifacts
 .pytest_cache
 .coverage
@@ -30,7 +33,7 @@ __pycache__
 # Store all dev files here.
 # Anything in this file will NOT be uploaded to the git repo, and ignored in the Docker build.
 workspace/*
-dist/*
+/dist/*
 
 # Do not ignore
 !requirements.txt

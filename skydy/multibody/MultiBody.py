@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sympy as sym
 
-from .connectors import Connection
+from ..connectors import Connection
 
 
 class MultiBody:
