@@ -1,1 +1,1 @@
-from . import connectors, inertia, multibody, rigidbody
+from . import configuration, connectors, inertia, multibody, rigidbody
