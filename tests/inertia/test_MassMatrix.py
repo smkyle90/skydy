@@ -8,7 +8,7 @@ import sympy as sym
 
 @pytest.mark.inertia
 def test_MassMatrix():
-    from lib.inertia import MassMatrix
+    from skydy.inertia import MassMatrix
 
     mass_name = "1"
 

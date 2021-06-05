@@ -2,9 +2,9 @@
 # from .State import State
 from .configuration import (
     BaseSymbols,
-    BodyCoordinate,
-    BodyDimension,
-    BodyForce,
-    BodyTorque,
     Configuration,
+    CoordinateSymbols,
+    DimensionSymbols,
+    ForceSymbols,
+    TorqueSymbols,
 )

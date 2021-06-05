@@ -1,6 +1,7 @@
 """Test the example function
 """
 
+import numpy as np
 import pytest
 
 
@@ -11,71 +12,84 @@ def test_BaseSymbols():
     b = BaseSymbols("1", "G", coordinates=True)
 
     print(b.symbols())
+    print(b.values())
+    print(b.as_dict())
+
+    b.assign_values(2, 2)
+    b.assign_values(3, 3)
+    b.assign_values(4, 4)
+
+    print(b.values())
+    print(b.as_dict())
 
     b = BaseSymbols("2", "T", coordinates=False)
     print(b.symbols())
+    b.assign_values([2, 4, 6])
+
+    print(b.values())
+    print(b.as_dict())
 
 
 @pytest.mark.configuration
-def test_BodyCoordinate():
-    from skydy.configuration import BodyCoordinate
+def test_CoordinateSymbols():
+    from skydy.configuration import CoordinateSymbols
 
-    body = BodyCoordinate("1")
+    body = CoordinateSymbols("1")
     print(body.symbols())
     print(body.velocities())
     print(body.positions())
 
-    body = BodyCoordinate("2")
+    body = CoordinateSymbols("2")
     print(body.symbols())
     print(body.velocities())
     print(body.positions())
 
-    body = BodyCoordinate("rod")
+    body = CoordinateSymbols("rod")
     print(body.symbols())
     print(body.velocities())
     print(body.positions())
 
 
 @pytest.mark.configuration
-def test_BodyDimension():
-    from skydy.configuration import BodyDimension
+def test_DimensionSymbols():
+    from skydy.configuration import DimensionSymbols
 
-    dir_vec = BodyDimension("1")
-    print(dir_vec.symbols())
+    dim_syms = DimensionSymbols("1")
+    print(dim_syms.symbols())
 
-    dir_vec = BodyDimension("2")
-    print(dir_vec.symbols())
+    dim_syms = DimensionSymbols("2")
+    print(dim_syms.symbols())
 
-    dir_vec = BodyDimension("rod")
-    print(dir_vec.symbols())
-
-
-@pytest.mark.configuration
-def test_BodyForce():
-    from skydy.configuration import BodyForce
-
-    body_force = BodyForce("1")
-    print(body_force.symbols())
-
-    body_force = BodyForce("2")
-    print(body_force.symbols())
-
-    body_force = BodyForce("rod")
-    print(body_force.symbols())
+    dim_syms = DimensionSymbols("rod")
+    print(dim_syms.symbols())
 
 
 @pytest.mark.configuration
-def test_BodyTorque():
-    from skydy.configuration import BodyTorque
+def test_ForceSymbols():
+    from skydy.configuration import ForceSymbols
 
-    body_torque = BodyTorque("1")
-    print(body_torque.symbols())
+    force_syms = ForceSymbols("1")
+    print(force_syms.symbols())
 
-    body_torque = BodyTorque("2")
-    print(body_torque.symbols())
+    force_syms = ForceSymbols("2")
+    print(force_syms.symbols())
 
-    body_torque = BodyTorque("rod")
-    print(body_torque.symbols())
+    force_syms = ForceSymbols("rod")
+    print(force_syms.symbols())
+
+
+@pytest.mark.configuration
+def test_TorqueSymbols():
+    from skydy.configuration import TorqueSymbols
+
+    torque_syms = TorqueSymbols("1")
+    print(torque_syms.symbols())
+
+    torque_syms = TorqueSymbols("2")
+    print(torque_syms.symbols())
+
+    torque_syms = TorqueSymbols("rod")
+    print(torque_syms.symbols())
 
 
 @pytest.mark.configuration
@@ -88,6 +102,24 @@ def test_Configuration():
     print(c.velocities())
     print(c.accelerations())
 
-    print(c.r_body())
-    print(c.R_body())
-    print(c.state_vector())
+    print(c.r_body)
+    print(c.R_body)
+    print(c.state_vec())
+
+    c.apply_constraint(1, 0)
+    print(c.r_body)
+
+    c.apply_constraint(0, 10)
+    print(c.r_body)
+
+    c.apply_constraint(3, np.pi)
+    c.apply_constraint(4, np.pi / 2)
+    c.apply_constraint(5, 0)
+    print(c.R_body)
+
+    print(c.as_dict())
+
+    c.reset_constraints()
+    print(c.r_body)
+    print(c.R_body)
+    print(c.as_dict())

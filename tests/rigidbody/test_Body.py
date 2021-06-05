@@ -8,8 +8,8 @@ import sympy as sym
 
 @pytest.mark.rigidbody
 def test_Body():
-    from lib.inertia import InertiaMatrix, MassMatrix
-    from lib.rigidbody import Body, BodyCoordinate, BodyForce, BodyTorque
+    from skydy.inertia import InertiaMatrix, MassMatrix
+    from skydy.rigidbody import Body, BodyCoordinate, BodyForce, BodyTorque
 
     # Test empty initialiser
     b0 = Body()
@@ -37,25 +37,28 @@ def test_Body():
     # Run methods
 
     # Get body linear and angular velocities
-    # v, w = b2.body_twists(b2.r_body, b2.R_body)
+    # v, w = b2.body_twists()
+    # # # b2.body_velocity(point_on_body)
 
-    # # b2.body_velocity(point_on_body)
+    # b2.kinetic_energy()
 
-    b2.kinetic_energy()
+    # g = sym.Symbol("g")
+    # gravity = sym.Matrix([0, 0, g])
+    # b2.potential_energy(gravity)
 
-    g = sym.Symbol("g")
-    gravity = sym.Matrix([0, 0, g])
-    b2.potential_energy(gravity)
+    # p_F1 = BodyCoordinate("F1", 0, 0, 0)
+    # F_1 = BodyForce("1", p_F1, x_dir=True)
+    # T_1 = BodyTorque("2", y_dir=True)
+    F1 = BodyForce("1", x_dir=True)
+    force_loc = BodyCoordinate("PF1", 0, 0, 0)
+    b2.add_force(F1, force_loc)
 
-    p_F1 = BodyCoordinate("F1", 0, 0, 0)
-    F_1 = BodyForce("1", p_F1, x_dir=True)
-    T_1 = BodyTorque("2", y_dir=True)
+    T1 = BodyTorque("1", x_dir=True)
+    T2 = BodyTorque("2", y_dir=True)
 
-    b2.add_force(F_1)
-    b2.add_torque(T_1)
+    torque_loc = BodyCoordinate("PT1", 0, 0, 0)
+    b2.add_torque(T1, torque_loc)
+    b2.add_torque(T2, torque_loc)
 
-    b2.apply_constraint(0)
-    b2.apply_constraint(1, 10)
-    b2.apply_constraint(3, np.pi)
-
-    b2.reset_constraints()
+    print(b2.linear_forces)
+    print(b2.linear_torques)

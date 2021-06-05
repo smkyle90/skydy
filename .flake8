@@ -8,3 +8,4 @@ exclude =
     __pycache__,
     tests/*,
     workspace/*
+    tex/*

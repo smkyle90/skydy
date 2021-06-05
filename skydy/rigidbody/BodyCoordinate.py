@@ -2,24 +2,12 @@
 import numpy as np
 import sympy as sym
 
+from ..configuration import DimensionSymbols
 
-class BodyCoordinate:
+
+class BodyCoordinate(DimensionSymbols):
     def __init__(self, name, x=0, y=0, z=0):
-        self.name = name
-        self.properties = {
-            "x": x,
-            "y": y,
-            "z": z,
-        }
-        self.__symbols = sym.Matrix(
-            [
-                sym.Symbol("l_{}_{}".format(self.name, k)) if v else 0
-                for k, v in self.properties.items()
-            ]
-        )
-
-    def symbols(self):
-        return self.__symbols
-
-    def values(self):
-        return np.array(list(self.properties.values()))
+        super().__init__(name)
+        self.assign_values(x, 0)
+        self.assign_values(y, 1)
+        self.assign_values(z, 2)

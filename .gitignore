@@ -34,6 +34,7 @@ __pycache__
 # Anything in this file will NOT be uploaded to the git repo, and ignored in the Docker build.
 workspace/*
 /dist/*
+tex/*
 
 # Do not ignore
 !requirements.txt

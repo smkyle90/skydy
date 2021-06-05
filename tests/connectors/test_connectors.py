@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.connectors
 def test_DOF():
-    from lib.connectors import DOF
+    from skydy.connectors import DOF
 
     d = DOF(0)
 
@@ -29,15 +29,15 @@ def test_DOF():
 
 @pytest.mark.connectors
 def test_SpringDamperCoeffs():
-    from lib.connectors import DOF, SpringDamperCoeffs
+    from skydy.connectors import DOF, SpringDamperCoeffs
 
     s = SpringDamperCoeffs("1")
 
 
 @pytest.mark.connectors
 def test_Joint():
-    from lib.connectors import DOF, Joint
-    from lib.rigidbody import BodyCoordinate
+    from skydy.connectors import DOF, Joint
+    from skydy.rigidbody import BodyCoordinate
 
     # Simple joint that moves in x-direction
     p0 = BodyCoordinate("O")
@@ -53,8 +53,8 @@ def test_Joint():
 
 @pytest.mark.connectors
 def test_Connection():
-    from lib.connectors import DOF, Connection, Joint
-    from lib.rigidbody import Body, BodyCoordinate
+    from skydy.connectors import DOF, Connection, Joint
+    from skydy.rigidbody import Body, BodyCoordinate
 
     # Simple joint that moves in x-direction
     p0 = BodyCoordinate("O")

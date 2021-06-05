@@ -16,13 +16,6 @@ class DOF:
         self.const_value = const_value
 
 
-class SpringDamperCoeffs:
-    def __init__(self, name):
-        dofs = ["x", "y", "z", "theta_x", "theta_y", "theta_z"]
-        self.K = ["k_{}_{}".format(name, dof) for dof in dofs]
-        self.C = ["c_{}_{}".format(name, dof) for dof in dofs]
-
-
 class Joint:
     id_counter = 0
 
@@ -87,8 +80,8 @@ class Joint:
 class Connection:
     def __init__(self, body_in, joint, body_out):
         self.body_in = copy.deepcopy(body_in)
-        self.body_out = copy.deepcopy(body_out)
         self.joint = copy.deepcopy(joint)
+        self.body_out = copy.deepcopy(body_out)
 
     @property
     def body_in(self):
@@ -116,3 +109,10 @@ class Connection:
     def joint(self, val):
         assert isinstance(val, Joint)
         self._joint = val
+
+
+class SpringDamperCoeffs:
+    def __init__(self, name):
+        dofs = ["x", "y", "z", "theta_x", "theta_y", "theta_z"]
+        self.K = ["k_{}_{}".format(name, dof) for dof in dofs]
+        self.C = ["c_{}_{}".format(name, dof) for dof in dofs]
