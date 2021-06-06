@@ -1,16 +1,8 @@
 #!/usr/bin/python3
 
-import numpy as np
 import sympy as sym
-from sympy.physics.mechanics import dynamicsymbols
 
-from ..configuration import (
-    Configuration,
-    CoordinateSymbols,
-    DimensionSymbols,
-    ForceSymbols,
-    TorqueSymbols,
-)
+from ..configuration import Configuration
 from ..inertia import InertiaMatrix, MassMatrix
 from .BodyCoordinate import BodyCoordinate
 from .BodyForce import BodyForce, BodyTorque

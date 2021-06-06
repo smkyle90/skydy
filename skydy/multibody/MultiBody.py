@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 import sympy as sym
-from sympy.physics.vector.printing import vlatex
 
 from ..connectors import Connection
+
+# from sympy.physics.vector.printing import vlatex
 
 
 class MultiBody:
@@ -178,7 +179,7 @@ class MultiBody:
         return sym.simplify(self.gen_forces)
 
     def get_equilibria(self, unforced=True):
-        LHS, RHS = self.eoms()
+        _LHS, RHS = self.eoms()
         for v in self.velocities:
             RHS = RHS.subs(v, 0)
 
@@ -210,7 +211,7 @@ class MultiBody:
         f = self.force_symbols()
 
         # get left and right hand sides of equtions of motion
-        LHS, RHS = self.eoms()
+        _LHS, RHS = self.eoms()
 
         self.__l = sym.Matrix.vstack(self.velocities, self.accelerations)
         self.__q = sym.Matrix.vstack(self.coordinates, self.velocities)
