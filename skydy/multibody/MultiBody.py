@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 import sympy as sym
+from sympy.physics.vector.printing import vlatex
 
 from ..connectors import Connection
 
 
 class MultiBody:
     id_counter = 0
+    id_names = []
 
     def __init__(self, connections, name=None):
         # Body accounting
@@ -15,6 +17,11 @@ class MultiBody:
             self.name = str(MultiBody.id_counter)
         else:
             self.name = str(name)
+
+        if self.name in MultiBody.id_names:
+            raise ValueError("Body name already exists.")
+        else:
+            MultiBody.id_names.append(self.name)
 
         self.connections = connections
         self.coordinates = []
@@ -240,7 +247,7 @@ class MultiBody:
     def get_configuration(self):
         return {name: body.as_dict() for name, body in self.bodies.items()}
 
-    def as_latex(self, linearized=False):
+    def as_latex(self, linearized=False, output_dir=None):
 
         # Coordintes
         _coordinates = "q_{" + self.name + "} = " + sym.latex(self.coordinates)
@@ -260,6 +267,7 @@ class MultiBody:
 
         # Lagrangian
         t_plus_v = sym.latex(self.kinetic_energy + self.potential_energy)
+        # t_plus_v = vlatex(self.kinetic_energy + self.potential_energy)
 
         _energy_eq = "L = " + t_plus_v
 
@@ -310,6 +318,7 @@ class MultiBody:
         latex_framework = (
             "\n\\documentclass[12pt]{article}\n"
             + "\n\\usepackage{amsmath}\n"
+            # + "\n\\usepackage{breqn}\n"
             + "\n\\begin{document}\n"
             + "\n\\subsection*{Coordinates}\n"
             + latexify(_coordinates)
@@ -327,14 +336,17 @@ class MultiBody:
             )
         )
 
+        if output_dir is None:
+            output_dir = "./tex"
+
         file_name = "out_{}".format(self.name)
-        with open(f"./tex/{file_name}.tex", "w") as text_file:
+        with open(f"{output_dir}/{file_name}.tex", "w") as text_file:
             text_file.write(latex_framework)
 
         import os
 
-        os.system(f"pdflatex ./tex/{file_name}.tex")
-        os.system(f"cp {file_name}.pdf ./tex")
+        os.system(f"pdflatex {output_dir}/{file_name}.tex")
+        os.system(f"cp {file_name}.pdf {output_dir}")
         os.system(f"rm {file_name}.aux {file_name}.log {file_name}.pdf")
 
     def symbols(self):
@@ -342,4 +354,4 @@ class MultiBody:
 
 
 def latexify(string):
-    return "$" + str(string) + "$ \\\\"
+    return "\\begin{equation}" + str(string) + "\\end{equation} \\\\"

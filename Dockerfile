@@ -4,6 +4,9 @@ FROM python:3.9.5-slim-buster
 RUN apt-get update && apt-get -y --no-install-recommends install \
 	# software-properties-common \
     # build-essential \
+    texlive-latex-base \
+    texlive-fonts-recommended \
+    texlive-fonts-extra \
     && apt-get -y autoremove \
     && apt-get clean autoclean
 
@@ -21,8 +24,8 @@ RUN pip install -r /third_party/requirements.txt
 # Copy and install other repos
 COPY ./third_party /third_party
 
-# Copy the current directory contents into the container at /app
-COPY . /app/
+# Copy the current directory contents into the container at /skydy
+COPY . /skydy/
 
-# Set the working directory to /app
-WORKDIR /app
+# Set the working directory to /skydy
+WORKDIR /skydy

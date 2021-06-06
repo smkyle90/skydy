@@ -20,6 +20,7 @@ from .BodyForce import BodyForce, BodyTorque
 
 class Body(Configuration):
     id_counter = 0
+    body_names = []
 
     def __init__(self, name=None):
         # Body accounting
@@ -29,6 +30,11 @@ class Body(Configuration):
             self.name = str(self.body_id)
         else:
             self.name = str(name)
+
+        if self.name in Body.body_names:
+            raise ValueError("Body name already exists.")
+        else:
+            Body.body_names.append(self.name)
 
         # Initialise the Configuration object
         super().__init__(self.name)
