@@ -2,6 +2,7 @@
 import sympy as sym
 
 from ..connectors import Connection
+from ..output import LatexDocument
 from ..rigidbody import Ground
 
 # from sympy.physics.vector.printing import vlatex
@@ -208,11 +209,9 @@ class MultiBody:
 
             # Get the position coefficient matrix
             K = self.__rhs.jacobian(self.coordinates)
-            K = K
 
             # Get the velocity coefficient matrix
             C = self.__rhs.jacobian(self.velocities)
-            C = C
 
             A[:ns, ns:] = sym.eye(ns)
             A[ns:, :ns] = -K
@@ -234,14 +233,8 @@ class MultiBody:
         # with open('./configs/result.yml', 'w') as yaml_file:
         #     yaml.dump(config_dict, yaml_file, default_flow_style=False)
 
-    def as_latex(self, linearized=False, output_dir=None):
-
-        # Coordintes
-        _coordinates = "q_{" + self.name + "} = " + sym.latex(self.coordinates)
-        _coordinates = _coordinates.replace("[", "(").replace("]", ")")
-
-        # Forward Kinematic Maps
-        _maps = [
+    def __latex_fk_maps(self):
+        fk_maps = [
             "\\Pi_{"
             + body.name
             + "} = \\left("
@@ -251,19 +244,22 @@ class MultiBody:
             + "\\right)"
             for body in self.bodies.values()
         ]
+        return latexify(fk_maps)
 
+    def __latex_lagrangian(self):
         # Lagrangian
         t_plus_v = sym.latex(self.kinetic_energy + self.potential_energy)
-        # t_plus_v = vlatex(self.kinetic_energy + self.potential_energy)
 
-        _energy_eq = "L = " + t_plus_v
+        str_lagrangian = "L = " + t_plus_v
+        return latexify(str_lagrangian)
 
+    def __latex_forces_and_torques(self):
         # Forces
-        _forces = []
-        _torques = []
+        forces = []
+        torques = []
 
         for loc, force, name in self.forces:
-            _forces.append(
+            forces.append(
                 "F_{"
                 + str(name)
                 + "} = \\left("
@@ -274,7 +270,7 @@ class MultiBody:
             )
 
         for loc, torque, name in self.torques:
-            _torques.append(
+            torques.append(
                 "\\tau_{"
                 + str(name)
                 + "} = \\left("
@@ -284,13 +280,24 @@ class MultiBody:
                 + "\\right)"
             )
 
-        _forces_and_torques = _forces + _torques
+        return latexify(forces + torques)
 
+    def __latex_coordinates(self):
+        # Coordintes
+        coordinates = "q_{" + self.name + "} = " + sym.latex(self.coordinates)
+        coordinates = coordinates.replace("[", "(").replace("]", ")")
+        return latexify(coordinates)
+
+    def __latex_ke_metric(self):
+        ke_metric = "G = " + sym.latex(self.G)
+        return latexify(ke_metric)
+
+    def __latex_eoms(self, linearized):
         # Equations of motion
         A, B = self.system_matrices(linearized)
 
         if linearized:
-            _eoms = (
+            eoms = (
                 sym.latex(sym.Matrix([[sym.Symbol("I"), 0], [0, sym.Symbol("G")]]))
                 + sym.latex(self.__l)
                 + " = "
@@ -301,65 +308,38 @@ class MultiBody:
                 + sym.latex(self.__u)
             )
         else:
-            _eoms = (
+            eoms = (
                 sym.latex(sym.Matrix([[sym.Symbol("I"), 0], [0, sym.Symbol("G")]]))
                 + sym.latex(self.__l)
                 + " = "
                 + sym.latex(sym.simplify(A))
             )
 
-        _ke_metric = "G = " + sym.latex(self.G)
+        return latexify(eoms)
 
-        latex_framework = (
-            "\n\\documentclass[8pt]{article}\n"
-            + "\n\\usepackage{amsmath}\n"
-            # + "\n\\usepackage{flexisym}\n"
-            # + "\n\\usepackage{breqn}\n"
-            + "\n\\usepackage{geometry}\n"
-            + "\n\\geometry{margin=1cm}"
-            + "\n\\begin{document}\n"
-            + "\n\\subsection*{Coordinates}\n"
-            + latexify(_coordinates)
-            + "\n\\subsection*{Configuration}\n"
-            + latexify(_maps)
-            + "\n\\subsection*{Energy}\n"
-            + latexify(_energy_eq)
-            + "\n\\subsection*{Kinetic Energy Metric}\n"
-            + latexify(_ke_metric)
-            + "\n\\subsection*{Forces and Torques}\n"
-            + latexify(_forces_and_torques)
-            + "\n\\subsection*{Equations of Motion}\n"
-            + latexify(_eoms)
-            + "\n\\end{document} \
-            "
-        )
+    def as_latex(self, linearized=False, output_dir=None):
+        latex_doc = LatexDocument()
+        # Coordinates
+        _coordinates = self.__latex_coordinates()
+        latex_doc.add_section("Coordinates", _coordinates)
 
-        remove_strs = [
-            "            ",
-            "{\\left(t \\right)}",
-            "1.0",
-        ]
+        # Forward Kinematic Maps
+        _maps = self.__latex_fk_maps()
+        latex_doc.add_section("Configuration", _maps)
+        # Lagrangian
+        _energy_eq = self.__latex_lagrangian()
+        latex_doc.add_section("Energy", _energy_eq)
+        # KE Metric
+        _ke_metric = self.__latex_ke_metric()
+        latex_doc.add_section("Kinetic Energy Metric", _ke_metric)
+        # Forces
+        _forces_and_torques = self.__latex_forces_and_torques()
+        latex_doc.add_section("Forces and Torques", _forces_and_torques)
+        # Equations of Motion
+        _eoms = self.__latex_eoms(linearized)
+        latex_doc.add_section("Equations of Motion", _eoms)
 
-        for r_str in remove_strs:
-            latex_framework = latex_framework.replace(r_str, "")
-
-        replace_strs = [("0.5", "\\frac{1}{2}")]
-
-        for old_str, new_str in replace_strs:
-            latex_framework = latex_framework.replace(old_str, new_str)
-
-        if output_dir is None:
-            output_dir = "./tex"
-
-        file_name = "out_{}".format(self.name)
-        with open(f"{output_dir}/{file_name}.tex", "w") as text_file:
-            text_file.write(latex_framework)
-
-        import os
-
-        os.system(f"pdflatex {output_dir}/{file_name}.tex")
-        os.system(f"cp {file_name}.pdf {output_dir}")
-        os.system(f"rm {file_name}.aux {file_name}.log {file_name}.pdf")
+        latex_doc.write_pdf(f"multibody_{self.name}")
 
     def symbols(self):
         return self.eom.free_symbols
