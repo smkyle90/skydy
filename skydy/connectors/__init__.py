@@ -1,1 +1,3 @@
-from .connectors import DOF, Connection, Joint, SpringDamperCoeffs
+from .Connection import Connection
+from .DOF import DOF
+from .Joint import Joint

@@ -2,6 +2,7 @@
 import sympy as sym
 
 from ..connectors import Connection
+from ..rigidbody import Ground
 
 # from sympy.physics.vector.printing import vlatex
 
@@ -29,7 +30,8 @@ class MultiBody:
         self.velocities = []
         self.accelerations = []
 
-        self.bodies = {}
+        g = Ground()
+        self.bodies = {g.name: g}
         self.joints = {}
         self.forces = []
         self.torques = []
@@ -43,13 +45,15 @@ class MultiBody:
         self.__l = None
         self.__q = None
         self.__u = None
+        self.__lhs = None
+        self.__rhs = None
 
         self.__forward_kinematics()
         self.__calculate_energy()
-
         self.__ke_metric()
+
+        self.__forces_and_torques()
         self.__el_equations()
-        self.__calculate_forces()
 
     @property
     def connections(self):
@@ -57,6 +61,9 @@ class MultiBody:
 
     @connections.setter
     def connections(self, val):
+        # Ensure first object is ground
+        assert isinstance(val[0].body_in, Ground)
+
         for v in val:
             assert isinstance(v, Connection)
 
@@ -67,65 +74,40 @@ class MultiBody:
 
     def __forward_kinematics(self):
         for cnx in self.connections:
-            q = cnx.body_out.positions()
-            v = cnx.body_out.velocities()
-            a = cnx.body_out.accelerations()
-
-            for dof in cnx.joint.dof:
-                if dof.free:
-                    self.coordinates.append(q[dof.idx])
-                    self.velocities.append(v[dof.idx])
-                    self.accelerations.append(a[dof.idx])
-                else:
-                    cnx.body_out.apply_constraint(dof.idx, dof.const_value)
-
             if self.bodies.get(cnx.body_in.name, False):
-                body_in = self.bodies[cnx.body_in.name]
-                r = body_in.pos_body
-                R = body_in.rot_body
+                # need to set the global position of the input body
+                cnx.body_in = self.bodies[cnx.body_in.name]
+
+                # Propagate the global configuration
+                cnx.global_configuration()
             else:
-                r = sym.zeros(3, 1)
-                R = sym.eye(3)
-
-            # Propagate rotations
-            cnx.body_out.rot_body = sym.simplify(R @ cnx.body_out.rot_body)
-
-            # Get absolute positions
-            p_in = r  # global coordinate of input link
-            p_j_in = (
-                R @ cnx.joint.body_in_coord.symbols()
-            )  # global position of connection on input link
-            p_out_j = (
-                cnx.body_out.rot_body @ cnx.joint.body_out_coord.symbols()
-            )  # global position of output link to joint
-            add_dof = (
-                cnx.body_out.rot_body @ cnx.body_out.pos_body
-            )  # additional dofs from joint
-
-            cnx.body_out.pos_body = sym.simplify(p_in + p_j_in + p_out_j + add_dof)
-
-            for F, P in cnx.body_out.linear_forces:
-                loc_force = sym.simplify(
-                    cnx.body_out.pos_body + cnx.body_out.rot_body @ P.symbols()
-                )
-                dir_force = sym.simplify(cnx.body_out.rot_body @ F.symbols())
-                self.forces.append((loc_force, dir_force, F.name))
-
-            for T, P in cnx.body_out.linear_torques:
-                loc_torque = sym.Matrix(
-                    [
-                        q if t else 0
-                        for t, q in zip(T.symbols(), cnx.body_out.symbols()[3:])
-                    ]
-                )
-                self.torques.append((loc_torque, T.symbols(), T.name))
+                raise ValueError("Body is not connected to a grounded object.")
 
             self.bodies[cnx.body_out.name] = cnx.body_out
             self.joints[cnx.joint.name] = cnx.joint
 
+            self.coordinates.extend(cnx.body_out.free_coordinates())
+            self.velocities.extend(cnx.body_out.free_velocities())
+            self.accelerations.extend(cnx.body_out.free_accelerations())
+
         self.coordinates = sym.Matrix(self.coordinates)
         self.velocities = sym.Matrix(self.velocities)
         self.accelerations = sym.Matrix(self.accelerations)
+
+    def __forces_and_torques(self):
+        for body in self.bodies.values():
+            # Calculate the globl magnitude, direction and location of forces and torques
+            for F, P in body.linear_forces:
+                loc_force = sym.simplify(body.pos_body + body.rot_body @ P.symbols())
+                dir_force = sym.simplify(body.rot_body @ F.symbols())
+                self.forces.append((loc_force, dir_force, F.name))
+
+            # Calculate the global torques
+            for T, P in body.linear_torques:
+                loc_torque = sym.Matrix(
+                    [q if t else 0 for t, q in zip(T.symbols(), body.symbols()[3:])]
+                )
+                self.torques.append((loc_torque, T.symbols(), T.name))
 
     def __calculate_energy(self):
         # Global gravity vector
@@ -151,6 +133,7 @@ class MultiBody:
         self.G = sym.simplify(G)
 
     def __el_equations(self):
+        # Get unforced dynamics
         dyn_g = sym.zeros(self.G.shape[0], 1)
         L = self.kinetic_energy - self.potential_energy
         for i, (qi, dqi) in enumerate(zip(self.coordinates, self.velocities)):
@@ -160,9 +143,8 @@ class MultiBody:
             dyn_g[i] = dli
 
         self.eom = sym.simplify(dyn_g)
-        return self.eom
 
-    def __calculate_forces(self):
+        # Add generalised forces
         gen_forces = {coord: 0 for coord in self.coordinates}
         for coord in gen_forces:
             for loc, force, _ in self.forces:
@@ -176,7 +158,13 @@ class MultiBody:
                 gen_forces[coord] = gen_forces[coord] + gen_f
 
         self.gen_forces = sym.Matrix([gen_forces[k] for k in self.coordinates])
-        return sym.simplify(self.gen_forces)
+
+        # Get the left and right hand side of the equations of motion
+        # The LHS is the KE metric times accelerations
+        self.__lhs = sym.simplify(self.G @ sym.Matrix(self.accelerations))
+
+        # The RHS is the eoms less the LHS, plus the generalised forces
+        self.__rhs = sym.simplify(-(self.eom - self.__lhs) + self.gen_forces)
 
     def get_equilibria(self, unforced=True):
         _LHS, RHS = self.eoms()
@@ -198,20 +186,10 @@ class MultiBody:
         return list(set(self.gen_forces.free_symbols) - set(self.coordinates))
 
     def eoms(self):
-        # Algebra on the calculated equations of motion
-        # The LHS is the KE metric times accelerations
-        LHS = self.G @ sym.Matrix(self.accelerations)
-
-        # The RHS is the eoms less the LHS, plus the generalised forces
-        RHS = -(self.eom - LHS) + self.gen_forces
-
-        return sym.simplify(LHS), sym.simplify(RHS)
+        return self.__lhs, self.__rhs
 
     def system_matrices(self, linearized=False):
         f = self.force_symbols()
-
-        # get left and right hand sides of equtions of motion
-        _LHS, RHS = self.eoms()
 
         self.__l = sym.Matrix.vstack(self.velocities, self.accelerations)
         self.__q = sym.Matrix.vstack(self.coordinates, self.velocities)
@@ -219,8 +197,8 @@ class MultiBody:
 
         if linearized:
             # Input matrix.
-            B = RHS.jacobian(f)
-            U = self.G.inv() @ B
+            B = self.__rhs.jacobian(f)
+            U = B
 
             ns, nu = B.shape
             B = sym.zeros(2 * ns, nu)
@@ -229,24 +207,32 @@ class MultiBody:
             A = sym.zeros(2 * ns, 2 * ns)
 
             # Get the position coefficient matrix
-            K = RHS.jacobian(self.coordinates)
-            K = self.G.inv() @ K
+            K = self.__rhs.jacobian(self.coordinates)
+            K = K
 
             # Get the velocity coefficient matrix
-            C = RHS.jacobian(self.velocities)
-            C = self.G.inv() @ C
+            C = self.__rhs.jacobian(self.velocities)
+            C = C
 
             A[:ns, ns:] = sym.eye(ns)
             A[ns:, :ns] = -K
             A[ns:, ns:] = -C
         else:
-            A = sym.Matrix.vstack(self.velocities, self.G.inv() @ RHS)
-            B = sym.zeros(*RHS.shape)
+            A = sym.Matrix.vstack(self.velocities, self.__rhs)
+            B = sym.zeros(*self.__rhs.shape)
 
         return sym.simplify(A), sym.simplify(B)
 
     def get_configuration(self):
-        return {name: body.as_dict() for name, body in self.bodies.items()}
+        config_dict = {
+            name: {"coords": body.as_dict(), "dims": body.dims.as_dict()}
+            for name, body in self.bodies.items()
+        }
+        return config_dict
+
+        # import yaml
+        # with open('./configs/result.yml', 'w') as yaml_file:
+        #     yaml.dump(config_dict, yaml_file, default_flow_style=False)
 
     def as_latex(self, linearized=False, output_dir=None):
 
@@ -259,9 +245,9 @@ class MultiBody:
             "\\Pi_{"
             + body.name
             + "} = \\left("
-            + sym.latex(body.pos_body)
+            + sym.latex(sym.simplify(body.pos_body))
             + ", "
-            + sym.latex(body.rot_body)
+            + sym.latex(sym.simplify(body.rot_body))
             + "\\right)"
             for body in self.bodies.values()
         ]
@@ -305,7 +291,8 @@ class MultiBody:
 
         if linearized:
             _eoms = (
-                sym.latex(self.__l)
+                sym.latex(sym.Matrix([[sym.Symbol("I"), 0], [0, sym.Symbol("G")]]))
+                + sym.latex(self.__l)
                 + " = "
                 + sym.latex(A)
                 + sym.latex(self.__q)
@@ -314,28 +301,52 @@ class MultiBody:
                 + sym.latex(self.__u)
             )
         else:
-            _eoms = sym.latex(self.__l) + " = " + sym.latex(sym.simplify(A))
+            _eoms = (
+                sym.latex(sym.Matrix([[sym.Symbol("I"), 0], [0, sym.Symbol("G")]]))
+                + sym.latex(self.__l)
+                + " = "
+                + sym.latex(sym.simplify(A))
+            )
+
+        _ke_metric = "G = " + sym.latex(self.G)
 
         latex_framework = (
-            "\n\\documentclass[12pt]{article}\n"
+            "\n\\documentclass[8pt]{article}\n"
             + "\n\\usepackage{amsmath}\n"
+            # + "\n\\usepackage{flexisym}\n"
             # + "\n\\usepackage{breqn}\n"
+            + "\n\\usepackage{geometry}\n"
+            + "\n\\geometry{margin=1cm}"
             + "\n\\begin{document}\n"
             + "\n\\subsection*{Coordinates}\n"
             + latexify(_coordinates)
             + "\n\\subsection*{Configuration}\n"
-            + "\n".join([latexify(m) for m in _maps])
+            + latexify(_maps)
             + "\n\\subsection*{Energy}\n"
             + latexify(_energy_eq)
+            + "\n\\subsection*{Kinetic Energy Metric}\n"
+            + latexify(_ke_metric)
             + "\n\\subsection*{Forces and Torques}\n"
-            + "\n".join([latexify(ft) for ft in _forces_and_torques])
+            + latexify(_forces_and_torques)
             + "\n\\subsection*{Equations of Motion}\n"
             + latexify(_eoms)
             + "\n\\end{document} \
-            ".replace(
-                "            ", ""
-            )
+            "
         )
+
+        remove_strs = [
+            "            ",
+            "{\\left(t \\right)}",
+            "1.0",
+        ]
+
+        for r_str in remove_strs:
+            latex_framework = latex_framework.replace(r_str, "")
+
+        replace_strs = [("0.5", "\\frac{1}{2}")]
+
+        for old_str, new_str in replace_strs:
+            latex_framework = latex_framework.replace(old_str, new_str)
 
         if output_dir is None:
             output_dir = "./tex"
@@ -354,5 +365,8 @@ class MultiBody:
         return self.eom.free_symbols
 
 
-def latexify(string):
-    return "\\begin{equation}" + str(string) + "\\end{equation} \\\\"
+def latexify(string_item):
+    if isinstance(string_item, list):
+        return "\n".join([latexify(item) for item in string_item])
+    else:
+        return "\\begin{equation}" + str(string_item) + "\\end{equation} \\\\"

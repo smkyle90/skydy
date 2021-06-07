@@ -1,19 +1,6 @@
 #!/usr/bin/python3
-import copy
-
-from ..rigidbody import Body, BodyCoordinate
-
-# import numpy as np
-
-
-# import sympy as sym
-
-
-class DOF:
-    def __init__(self, idx, free=True, const_value=0):
-        self.idx = idx
-        self.free = free
-        self.const_value = const_value
+from ..rigidbody import BodyCoordinate
+from .DOF import DOF
 
 
 class Joint:
@@ -75,44 +62,3 @@ class Joint:
         for idx in rem_idx:
             val.append(DOF(idx, False))
         self._dof = val
-
-
-class Connection:
-    def __init__(self, body_in, joint, body_out):
-        self.body_in = copy.deepcopy(body_in)
-        self.joint = copy.deepcopy(joint)
-        self.body_out = copy.deepcopy(body_out)
-
-    @property
-    def body_in(self):
-        return self._body_in
-
-    @body_in.setter
-    def body_in(self, val):
-        assert isinstance(val, Body)
-        self._body_in = val
-
-    @property
-    def body_out(self):
-        return self._body_out
-
-    @body_out.setter
-    def body_out(self, val):
-        assert isinstance(val, Body)
-        self._body_out = val
-
-    @property
-    def joint(self):
-        return self._joint
-
-    @joint.setter
-    def joint(self, val):
-        assert isinstance(val, Joint)
-        self._joint = val
-
-
-class SpringDamperCoeffs:
-    def __init__(self, name):
-        dofs = ["x", "y", "z", "theta_x", "theta_y", "theta_z"]
-        self.K = ["k_{}_{}".format(name, dof) for dof in dofs]
-        self.C = ["c_{}_{}".format(name, dof) for dof in dofs]

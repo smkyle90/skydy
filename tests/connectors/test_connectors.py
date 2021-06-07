@@ -28,13 +28,6 @@ def test_DOF():
 
 
 @pytest.mark.connectors
-def test_SpringDamperCoeffs():
-    from skydy.connectors import DOF, SpringDamperCoeffs
-
-    s = SpringDamperCoeffs("1")
-
-
-@pytest.mark.connectors
 def test_Joint():
     from skydy.connectors import DOF, Joint
     from skydy.rigidbody import BodyCoordinate
@@ -54,18 +47,62 @@ def test_Joint():
 @pytest.mark.connectors
 def test_Connection():
     from skydy.connectors import DOF, Connection, Joint
-    from skydy.rigidbody import Body, BodyCoordinate
+    from skydy.rigidbody import Body, BodyCoordinate, Ground
 
     # Simple joint that moves in x-direction
     p0 = BodyCoordinate("O")
     p1 = BodyCoordinate("G/O", 0, 0, 0)
+
     j1 = Joint(p0, p1, [DOF(0,)])
 
-    b1 = Body()
+    b1 = Ground()
     b2 = Body()
 
     cnx = Connection(b1, j1, b2)
 
-    cnx.body_in
-    cnx.body_out
-    cnx.joint
+    print(cnx.body_in.pos_body)
+    print(cnx.body_in.rot_body)
+
+    print(cnx.body_out.pos_body)
+    print(cnx.body_out.rot_body)
+
+    print(cnx.joint)
+
+    # Propagate the global coordinates from the ground
+    cnx.global_configuration()
+
+    print(cnx.body_in.pos_body)
+    print(cnx.body_in.rot_body)
+
+    print(cnx.body_out.pos_body)
+    print(cnx.body_out.rot_body)
+
+    print(cnx.joint)
+
+    # Rotation
+    p1 = BodyCoordinate("G2/O", 2, 0, 0)
+
+    j2 = Joint(p0, p1, [DOF(4,)])
+
+    b2 = Body()
+
+    cnx = Connection(b1, j2, b2)
+
+    print(cnx.body_in.pos_body)
+    print(cnx.body_in.rot_body)
+
+    print(cnx.body_out.pos_body)
+    print(cnx.body_out.rot_body)
+
+    print(cnx.joint)
+
+    # Propagate the global coordinates from the ground
+    cnx.global_configuration()
+
+    print(cnx.body_in.pos_body)
+    print(cnx.body_in.rot_body)
+
+    print(cnx.body_out.pos_body)
+    print(cnx.body_out.rot_body)
+
+    print(cnx.joint)

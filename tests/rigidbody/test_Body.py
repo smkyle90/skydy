@@ -14,19 +14,12 @@ def test_Body():
     # Test empty initialiser
     b0 = Body()
 
-    assert b0.name == "0"
-    assert b0.body_id == 0
-    assert Body.id_counter == 1
+    assert b0.name
+
     assert isinstance(b0.mass_matrix, MassMatrix)
     assert isinstance(b0.inertia_matrix, InertiaMatrix)
     assert b0.linear_forces == []
     assert b0.linear_torques == []
-
-    # Ensure it counts up on another empty initialiser
-    b1 = Body()
-
-    assert b1.name == "1"
-    assert b1.body_id == 1
 
     # String body name
     body_name = "test"
@@ -40,15 +33,12 @@ def test_Body():
     # v, w = b2.body_twists()
     # # # b2.body_velocity(point_on_body)
 
-    # b2.kinetic_energy()
+    b2.kinetic_energy()
 
-    # g = sym.Symbol("g")
-    # gravity = sym.Matrix([0, 0, g])
-    # b2.potential_energy(gravity)
+    g = sym.Symbol("g")
+    gravity = sym.Matrix([0, 0, g])
+    b2.potential_energy(gravity)
 
-    # p_F1 = BodyCoordinate("F1", 0, 0, 0)
-    # F_1 = BodyForce("1", p_F1, x_dir=True)
-    # T_1 = BodyTorque("2", y_dir=True)
     F1 = BodyForce("1", x_dir=True)
     force_loc = BodyCoordinate("PF1", 0, 0, 0)
     b2.add_force(F1, force_loc)
@@ -62,3 +52,26 @@ def test_Body():
 
     print(b2.linear_forces)
     print(b2.linear_torques)
+
+    print(b2.dims)
+    print(b2.dims.symbols())
+    print(b2.dims.values())
+    b2.dims.assign_values([10, 0, 0])
+    print(b2.dims.symbols())
+    print(b2.dims.values())
+
+
+@pytest.mark.rigidbody
+def test_Ground():
+    from skydy.rigidbody import Ground
+
+    g = Ground()
+
+    print(g.symbols())
+    print(g.values())
+    print(g.as_dict())
+    print(g.dims.symbols())
+    print(g.dims.values())
+    print(g.dims.as_dict())
+    print(g.pos_body)
+    print(g.rot_body)

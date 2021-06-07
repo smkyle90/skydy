@@ -102,24 +102,24 @@ def test_Configuration():
     print(c.velocities())
     print(c.accelerations())
 
-    print(c.r_body)
-    print(c.R_body)
+    print(c.pos_body)
+    print(c.rot_body)
     print(c.state_vec())
 
     c.apply_constraint(1, 0)
-    print(c.r_body)
+    print(c.pos_body)
 
     c.apply_constraint(0, 10)
-    print(c.r_body)
+    print(c.pos_body)
 
     c.apply_constraint(3, np.pi)
     c.apply_constraint(4, np.pi / 2)
     c.apply_constraint(5, 0)
-    print(c.R_body)
+    print(c.pos_body)
 
     print(c.as_dict())
 
     c.reset_constraints()
-    print(c.r_body)
-    print(c.R_body)
+    print(c.pos_body)
+    print(c.rot_body)
     print(c.as_dict())
