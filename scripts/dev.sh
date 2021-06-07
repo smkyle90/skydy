@@ -8,4 +8,5 @@ sudo docker run -it --privileged --rm \
   -e DISPLAY=$DISPLAY \
   -v $(pwd):/skydy:rw \
   --name=${CONTAINER_NAME} \
-  ${CONTAINER_NAME}:latest
+  ${CONTAINER_NAME}:latest \
+  /bin/bash

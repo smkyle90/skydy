@@ -1,5 +1,7 @@
 #!/usr/bin/python3
+import matplotlib.pyplot as plt
 import sympy as sym
+from mpl_toolkits import mplot3d
 
 from ..connectors import Connection
 from ..output import LatexDocument
@@ -339,7 +341,28 @@ class MultiBody:
         _eoms = self.__latex_eoms(linearized)
         latex_doc.add_section("Equations of Motion", _eoms)
 
-        latex_doc.write_pdf(f"multibody_{self.name}")
+        latex_doc.write_pdf(f"multibody_{self.name}", output_dir)
+
+    def draw(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+
+        sub_vals = {}
+        for cnx in self.connections:
+            sub_vals = {
+                **sub_vals,
+                **cnx.body_in.as_dict(),
+                **cnx.body_out.as_dict(),
+                **cnx.joint.body_in_coord.as_dict(),
+                **cnx.joint.body_out_coord.as_dict(),
+            }
+
+            print(sub_vals)
+
+            ax = cnx.body_out.draw(ax=ax, ref_body=cnx.body_in, sub_vals=sub_vals)
+
+        plt.show()
+        # return ax
 
     def symbols(self):
         return self.eom.free_symbols
