@@ -89,10 +89,7 @@ class Body(Configuration):
         linear_torque = (torque_vector, torque_location)
         self.linear_torques.append(linear_torque)
 
-    def __sym_to_np(self, sym_matrix):
-        return np.array(sym_matrix.tolist()).astype(float)
-
-    def draw(self, ax=None, ref_body=None, sub_vals={}):
+    def draw(self, ax=None, ref_body=None, ref_joint=None, sub_vals={}):
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
@@ -100,39 +97,53 @@ class Body(Configuration):
         if ref_body is None:
             ref_body = Ground()
 
+        if ref_body is None:
+            ref_joint = np.zeros((3, 1))
+
         # Get body dimensions
         l, w, h = self.dims.values()
 
-        # get all the combinations of body_corners
-        body_corners = []
-        for i in [-1, 1]:
-            for j in [-1, 1]:
-                for k in [-1, 1]:
-                    body_corners.append(
-                        [i * l.item() / 2, j * w.item() / 2, k * h.item() / 2]
-                    )
-        # Convert to a numpy array
-        body_corners = np.block(body_corners)
+        # get all the combinations of body_corners as a np array
+        body_corners = np.array(
+            np.meshgrid(
+                [-l.item() / 2, l.item() / 2],
+                [-w.item() / 2, w.item() / 2],
+                [-w.item() / 2, w.item() / 2],
+            )
+        ).T.reshape(-1, 3)
 
         # Make copies of the position, rotation and origins
         this_rot = self.rot_body.copy()
+        half_rot = self.rot_body.copy()
         this_pos = self.pos_body.copy()
         that_orig = ref_body.pos_body.copy()
 
         # Sub in numeric values
         for s, v in sub_vals.items():
+            if s in self.symbols():
+                half_rot = half_rot.subs(s, v / 2)
+            else:
+                half_rot = half_rot.subs(s, v)
+
             this_pos = this_pos.subs(s, v)
             this_rot = this_rot.subs(s, v)
             that_orig = that_orig.subs(s, v)
 
         # Convert to numpy array
-        this_pos = self.__sym_to_np(this_pos)
-        this_rot = self.__sym_to_np(this_rot)
-        that_orig = self.__sym_to_np(that_orig)
+        this_pos = self.sym_to_np(this_pos)
+        this_rot = self.sym_to_np(this_rot)
+        that_orig = self.sym_to_np(that_orig)
+        half_rot = self.sym_to_np(half_rot)
 
         # Plot the COM
         ax.scatter3D(this_pos[0, 0], this_pos[1, 0], this_pos[2, 0], c="k")
-
+        ax.text(
+            this_pos[0, 0] - 0.2,
+            this_pos[1, 0] - 0.2,
+            this_pos[2, 0] - 0.2,
+            "$G_{" + f"{self.name}" + "}$",
+            c="k",
+        )
         # plot the vector from the base COM to this body's COM
         ax.plot3D(*np.hstack((that_orig, this_pos)).tolist(), c="k", linewidth=0.5)
         ax.text(
@@ -160,10 +171,10 @@ class Body(Configuration):
         # label the dimensions of the body
         # from the 0th index in the body corners,
         # the:
-        #   length is a vector from the 0th index to the 4th index,
-        #   width is a vector from the 0th index to the 2th index,
-        #   height is a vector from the 0th index to the 1st index.
-        dim_idx = [4, 2, 1]
+        #   - l is a vector from the 0th index to the 2nd index,
+        #   - w is a vector from the 0th index to the 4th index,
+        #   - h is a vector from the 0th index to the 1st index.
+        dim_idx = [2, 4, 1]
         for dim, symbol in zip(dim_idx, self.dims.symbols()):
             if symbol:
                 v_start = rot_body_corners[0].reshape(-1, 1)
@@ -173,7 +184,8 @@ class Body(Configuration):
                 ax.text(*v_dim.mean(axis=1), symbols_to_latex(symbol), c="g")
 
         # Plot the principal axes
-        body_dims = np.diag([l.item(), w.item(), h.item()])
+        body_dims = np.diag(self.dims.values().reshape(-1,))
+
         for i in [-1, 1]:
             rot_body_axes = this_pos + i * this_rot @ body_dims
 
@@ -182,9 +194,17 @@ class Body(Configuration):
                 ax.plot3D(*v_axes.tolist(), c="k", linewidth=0.25, linestyle="--")
 
                 if (i == 1) and (idx + 3 in self.free_idx):
+                    base_vector = np.zeros((3, 1))
+                    base_vector[(idx + 2) % 3, 0] = 1
+
+                    rot_ax = ref_joint + half_rot @ base_vector
+
+                    v_axes = np.hstack((ref_joint, np.array(rot_ax).reshape(-1, 1)))
+                    ax.plot3D(*v_axes.tolist(), c="m", linewidth=0.25, linestyle="-")
                     ax.text(
-                        *that_orig.reshape(-1,).tolist(),
+                        *rot_ax.reshape(-1,).tolist(),
                         symbols_to_latex(self.positions()[idx + 3]),
+                        c="m",
                     )
 
         return ax

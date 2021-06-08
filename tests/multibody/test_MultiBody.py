@@ -26,7 +26,7 @@ def test_MultiBody():
     p1 = BodyCoordinate("G1/O", 0, 0, 0)
 
     # add the joint, with a sliding DOF in the x-direction
-    j1 = Joint(p0, p1, [DOF(0,)])
+    j1 = Joint(p0, p1, [DOF(0,)], name="O")
 
     # Add force to cart. Force is applied at the COM
     F1 = BodyForce(1, x_dir=True)
@@ -74,7 +74,7 @@ def test_MultiBody():
     # Pendulum
     print("\n===Link 1===")
     b_pen_1 = Body("lk1")
-    p2 = BodyCoordinate("G2/0", l, 0, 0)
+    p2 = BodyCoordinate("G2/O", l, 0, 0)
     j2 = Joint(p0, p2, [DOF(4,)])
 
     # Add force to cart. Force is applied at the COM
@@ -124,15 +124,23 @@ def test_MultiBody():
 
     del body
     print("\n===Cart Pendulum===")
-    b_pen_1 = Body("pen")
-    p3 = BodyCoordinate("G2/G1", l, 0, 0)
-    j3 = Joint(p1, p3, [DOF(4,)])
+    l = 2
+    b_car = Body("c")
+    b_pen = Body("p")
 
-    # Add force to cart. Force is applied at the COM
-    T1 = BodyTorque(1, y_dir=True)
-    torque_loc = BodyCoordinate("PT1", -l, 0, 0)
-    b_pen_1.add_torque(T1, torque_loc)
-    cnx_pen_1 = Connection(b_car, j2, b_pen_1)
+    b_car.dims.assign_values([4, 1, 1])
+    b_pen.dims.assign_values([2 * l, 0, 0])
+
+    p0 = BodyCoordinate("O", 0, 0, 0)
+    p1 = BodyCoordinate("Gc/O", 0, 0, 0)
+    p2 = BodyCoordinate("A/Gc", 0, 0, 0)
+    p3 = BodyCoordinate("Gp/A", l, 0, 0)
+
+    j1 = Joint(p0, p1, [DOF(0,)], name="O")
+    j1 = Joint(p2, p3, [DOF(4,)], name="A")
+
+    cnx_car = Connection(b_gnd, j1, b_car)
+    cnx_pen = Connection(b_car, j2, b_pen)
 
     body = MultiBody([cnx_car, cnx_pen_1])
 
@@ -142,7 +150,7 @@ def test_MultiBody():
     print("\n===Double Pendulum===")
 
     b_pen_1 = Body("p1")
-    p1 = BodyCoordinate("G2/0", l, 0, 0)
+    p1 = BodyCoordinate("G2/O", l, 0, 0)
     j1 = Joint(p0, p1, [DOF(4,)])
 
     # Add force to cart. Force is applied at the COM
@@ -211,13 +219,13 @@ def test_MultiBody_draw():
 
     print("\n===1DOF===")
     b_car = Body("car")
-    b_car.dims.assign_values([2, 1, 1])
+    b_car.dims.assign_values([1, 0.5, 0.5])
 
     # Link in a pivot on the ground.
     p1 = BodyCoordinate("G1/O", 0, 0, 0)
 
     # add the joint, with a sliding DOF in the x-direction
-    j1 = Joint(p0, p1, [DOF(0,)])
+    j1 = Joint(p0, p1, [DOF(0,)], name="O")
 
     # Add force to cart. Force is applied at the COM
     F1 = BodyForce(1, x_dir=True)
@@ -232,6 +240,7 @@ def test_MultiBody_draw():
     body = MultiBody([cnx_car,])
 
     ax = body.draw()
+    plt.tight_layout()
     plt.show()
 
     del body
@@ -239,8 +248,8 @@ def test_MultiBody_draw():
     print("\n===Link 1===")
     b_pen_1 = Body("1")
     b_pen_1.dims.assign_values([2 * l, 0, 0])
-    p2 = BodyCoordinate("G1/0", l, 0, 0)
-    j2 = Joint(p0, p2, [DOF(4,)])
+    p2 = BodyCoordinate("G1/O", l, 0, 0)
+    j2 = Joint(p0, p2, [DOF(4,)], name="O")
 
     # Add force to cart. Force is applied at the COM
     T1 = BodyTorque(1, y_dir=True)
@@ -259,18 +268,42 @@ def test_MultiBody_draw():
     ax = body.draw()
     plt.tight_layout()
     plt.show()
+    print("\n===Cart Pendulum===")
+    l = 2
+    b_car = Body("c")
+    b_pen = Body("p")
+
+    b_car.dims.assign_values([4, 1, 1])
+    b_pen.dims.assign_values([2 * l, 0, 0])
+
+    p0 = BodyCoordinate("O", 0, 0, 0)
+    p1 = BodyCoordinate("Gc/O", 0, 0, 0)
+    p2 = BodyCoordinate("A/Gc", 0, 0, 0)
+    p3 = BodyCoordinate("Gp/A", l, 0, 0)
+
+    j1 = Joint(p0, p1, [DOF(0,)], name="O")
+    j2 = Joint(p2, p3, [DOF(4,)], name="A")
+
+    cnx_car = Connection(b_gnd, j1, b_car)
+    cnx_pen = Connection(b_car, j2, b_pen)
+
+    body = MultiBody([cnx_car, cnx_pen])
+
+    ax = body.draw()
+    plt.tight_layout()
+    plt.show()
     del body
     print("\n===Double Pendulum===")
 
     b_pen_1 = Body("p1")
-    b_pen_1.dims.assign_values([2 * l, 0, 0])
+    b_pen_1.dims.assign_values([4 * l, 0, 0])
 
-    p1 = BodyCoordinate("Gp1/0", l, 0, 0)
-    j1 = Joint(p0, p1, [DOF(4,)])
+    p1 = BodyCoordinate("Gp1/O", 2 * l, 0, 0)
+    j1 = Joint(p0, p1, [DOF(4,)], name="O")
 
     # Add force to cart. Force is applied at the COM
     T1 = BodyTorque(1, y_dir=True)
-    torque_loc = BodyCoordinate("PT1", -l, 0, 0)
+    torque_loc = BodyCoordinate("PT1", -2 * l, 0, 0)
     b_pen_1.add_torque(T1, torque_loc)
 
     cnx_pen_1 = Connection(b_gnd, j1, b_pen_1)
@@ -280,7 +313,7 @@ def test_MultiBody_draw():
     b_pen_2.dims.assign_values([2 * l, 0, 0])
     p2 = BodyCoordinate("A/Gp1", l, 0, 0)
     p3 = BodyCoordinate("Gp2/A", l, 0, 0)
-    j2 = Joint(p2, p3, [DOF(4,)])
+    j2 = Joint(p2, p3, [DOF(4,)], name="A")
 
     # Add force to cart. Force is applied at the COM
     T2 = BodyTorque(2, y_dir=True)
@@ -292,5 +325,5 @@ def test_MultiBody_draw():
     body = MultiBody([cnx_pen_1, cnx_pen_2])
 
     ax = body.draw()
-
+    plt.tight_layout()
     plt.show()

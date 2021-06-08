@@ -61,6 +61,9 @@ class BaseSymbols:
                 )
             )
 
+    def sym_to_np(self, sym_matrix):
+        return np.array(sym_matrix.tolist()).astype(float)
+
 
 class CoordinateSymbols(BaseSymbols):
     def __init__(self, name):

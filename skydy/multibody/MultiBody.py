@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import matplotlib.pyplot as plt
+import numpy as np
 import sympy as sym
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits import mplot3d
@@ -345,26 +346,11 @@ class MultiBody:
 
         latex_doc.write_pdf(f"multibody_{self.name}", output_dir)
 
-    def draw(self):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-
-        sub_vals = {}
-        for cnx in self.connections:
-            sub_vals = {
-                **sub_vals,
-                **cnx.body_in.as_dict(),
-                **cnx.body_out.as_dict(),
-                **cnx.joint.body_in_coord.as_dict(),
-                **cnx.joint.body_out_coord.as_dict(),
-            }
-
-            ax = cnx.body_out.draw(ax=ax, ref_body=cnx.body_in, sub_vals=sub_vals)
-
+    def __draw_spatial_axes(self, ax):
         basis_vectors = [
-            (0.5, 0, 0),
-            (0, 0.5, 0),
-            (0, 0, 0.5),
+            (0.2, 0, 0),
+            (0, 0.2, 0),
+            (0, 0, 0.2),
         ]
 
         basis_labels = ["$X$", "$Y$", "$Z$"]
@@ -377,6 +363,46 @@ class MultiBody:
                 *basis, mutation_scale=5, lw=1, arrowstyle="-|>", color="r",
             )
             ax.add_artist(arrow)
+
+        return ax
+
+    def __equalize_axes(self, ax, mult=0.5):
+
+        x_lim = ax.get_xlim3d()
+        y_lim = ax.get_ylim3d()
+        z_lim = ax.get_ylim3d()
+
+        x0 = np.array(x_lim).mean()
+        y0 = np.array(y_lim).mean()
+        z0 = np.array(z_lim).mean()
+
+        max_ax = 0
+        for lim in [x_lim, y_lim, z_lim]:
+            dlim = np.abs(lim[1] - lim[0])
+            max_ax = max(dlim, max_ax)
+
+        ax.set_xlim3d(x0 - mult * max_ax, x0 + mult * max_ax)
+        ax.set_ylim3d(y0 - mult * max_ax, y0 + mult * max_ax)
+        ax.set_zlim3d(z0 - mult * max_ax, z0 + mult * max_ax)
+
+        return ax
+
+    def draw(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.set_axis_off()
+
+        sub_vals = {}
+        for cnx in self.connections:
+            sub_vals = {
+                **sub_vals,
+                **cnx.as_dict(),
+            }
+
+            ax = cnx.draw(ax=ax, sub_vals=sub_vals)
+
+        ax = self.__draw_spatial_axes(ax)
+        ax = self.__equalize_axes(ax)
 
         return ax
 
