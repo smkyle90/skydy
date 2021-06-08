@@ -2,8 +2,9 @@ FROM python:3.9.5-slim-buster
 
 # Install system packages that are considered standard for all Python applications
 RUN apt-get update && apt-get -y --no-install-recommends install \
-	# software-properties-common \
+    # software-properties-common \
     # build-essential \
+    python3-tk \
     texlive-latex-base \
     texlive-fonts-recommended \
     texlive-fonts-extra \

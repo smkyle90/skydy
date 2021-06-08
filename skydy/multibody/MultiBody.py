@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 import matplotlib.pyplot as plt
 import sympy as sym
+from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import proj3d
 
 from ..connectors import Connection
 from ..output import LatexDocument
@@ -357,12 +359,26 @@ class MultiBody:
                 **cnx.joint.body_out_coord.as_dict(),
             }
 
-            print(sub_vals)
-
             ax = cnx.body_out.draw(ax=ax, ref_body=cnx.body_in, sub_vals=sub_vals)
 
-        plt.show()
-        # return ax
+        basis_vectors = [
+            (0.5, 0, 0),
+            (0, 0.5, 0),
+            (0, 0, 0.5),
+        ]
+
+        basis_labels = ["$X$", "$Y$", "$Z$"]
+
+        for vec, label in zip(basis_vectors, basis_labels):
+            ax.text(*vec, label, c="r")
+
+            basis = [(0, i) for i in vec]
+            arrow = Arrow3D(
+                *basis, mutation_scale=5, lw=1, arrowstyle="-|>", color="r",
+            )
+            ax.add_artist(arrow)
+
+        return ax
 
     def symbols(self):
         return self.eom.free_symbols
@@ -373,3 +389,15 @@ def latexify(string_item):
         return "\n".join([latexify(item) for item in string_item])
     else:
         return "\\begin{equation}" + str(string_item) + "\\end{equation} \\\\"
+
+
+class Arrow3D(FancyArrowPatch):
+    def __init__(self, xs, ys, zs, *args, **kwargs):
+        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
+        self._verts3d = xs, ys, zs
+
+    def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        FancyArrowPatch.draw(self, renderer)

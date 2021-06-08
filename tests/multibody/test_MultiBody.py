@@ -237,9 +237,9 @@ def test_MultiBody_draw():
     del body
     # Pendulum
     print("\n===Link 1===")
-    b_pen_1 = Body("lk1")
+    b_pen_1 = Body("1")
     b_pen_1.dims.assign_values([2 * l, 0, 0])
-    p2 = BodyCoordinate("G2/0", l, 0, 0)
+    p2 = BodyCoordinate("G1/0", l, 0, 0)
     j2 = Joint(p0, p2, [DOF(4,)])
 
     # Add force to cart. Force is applied at the COM
@@ -257,39 +257,40 @@ def test_MultiBody_draw():
     body = MultiBody([cnx_pen_1,])
 
     ax = body.draw()
+    plt.tight_layout()
     plt.show()
     del body
-    # print("\n===Double Pendulum===")
+    print("\n===Double Pendulum===")
 
-    # b_pen_1 = Body("p1")
-    # b_pen_1.dims.assign_values([2*l, 0, 0])
+    b_pen_1 = Body("p1")
+    b_pen_1.dims.assign_values([2 * l, 0, 0])
 
-    # p1 = BodyCoordinate("G2/0", l, 0, 0)
-    # j1 = Joint(p0, p1, [DOF(4,)])
+    p1 = BodyCoordinate("Gp1/0", l, 0, 0)
+    j1 = Joint(p0, p1, [DOF(4,)])
 
-    # # Add force to cart. Force is applied at the COM
-    # T1 = BodyTorque(1, y_dir=True)
-    # torque_loc = BodyCoordinate("PT1", -l, 0, 0)
-    # b_pen_1.add_torque(T1, torque_loc)
+    # Add force to cart. Force is applied at the COM
+    T1 = BodyTorque(1, y_dir=True)
+    torque_loc = BodyCoordinate("PT1", -l, 0, 0)
+    b_pen_1.add_torque(T1, torque_loc)
 
-    # cnx_pen_1 = Connection(b_gnd, j1, b_pen_1)
+    cnx_pen_1 = Connection(b_gnd, j1, b_pen_1)
 
-    # # Pendulum
-    # b_pen_2 = Body("p2")
-    # b_pen_2.dims.assign_values([2*l, 0, 0])
-    # p2 = BodyCoordinate("A/G2", l, 0, 0)
-    # p3 = BodyCoordinate("G3/A", l, 0, 0)
-    # j2 = Joint(p2, p3, [DOF(4,)])
+    # Pendulum
+    b_pen_2 = Body("p2")
+    b_pen_2.dims.assign_values([2 * l, 0, 0])
+    p2 = BodyCoordinate("A/Gp1", l, 0, 0)
+    p3 = BodyCoordinate("Gp2/A", l, 0, 0)
+    j2 = Joint(p2, p3, [DOF(4,)])
 
-    # # Add force to cart. Force is applied at the COM
-    # T2 = BodyTorque(2, y_dir=True)
-    # torque_loc = BodyCoordinate("PT2", -l, 0, 0)
-    # b_pen_2.add_torque(T2, torque_loc)
+    # Add force to cart. Force is applied at the COM
+    T2 = BodyTorque(2, y_dir=True)
+    torque_loc = BodyCoordinate("PT2", -l, 0, 0)
+    b_pen_2.add_torque(T2, torque_loc)
 
-    # cnx_pen_2 = Connection(b_pen_1, j2, b_pen_2)
+    cnx_pen_2 = Connection(b_pen_1, j2, b_pen_2)
 
-    # body = MultiBody([cnx_pen_1, cnx_pen_2])
+    body = MultiBody([cnx_pen_1, cnx_pen_2])
 
-    # ax = body.draw()
+    ax = body.draw()
 
-    # plt.show()
+    plt.show()

@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
+import copy
+
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
-from mpl_toolkits import mplot3d
 
 from ..configuration import Configuration, DimensionSymbols
 from ..inertia import InertiaMatrix, MassMatrix
@@ -88,6 +89,9 @@ class Body(Configuration):
         linear_torque = (torque_vector, torque_location)
         self.linear_torques.append(linear_torque)
 
+    def __sym_to_np(self, sym_matrix):
+        return np.array(sym_matrix.tolist()).astype(float)
+
     def draw(self, ax=None, ref_body=None, sub_vals={}):
         if ax is None:
             fig = plt.figure()
@@ -96,39 +100,40 @@ class Body(Configuration):
         if ref_body is None:
             ref_body = Ground()
 
+        # Get body dimensions
         l, w, h = self.dims.values()
+
         # get all the combinations of body_corners
         body_corners = []
         for i in [-1, 1]:
             for j in [-1, 1]:
                 for k in [-1, 1]:
-                    body_corners.append([i * l / 2, j * w / 2, k * h / 2])
+                    body_corners.append(
+                        [i * l.item() / 2, j * w.item() / 2, k * h.item() / 2]
+                    )
+        # Convert to a numpy array
+        body_corners = np.block(body_corners)
 
-        this_rot = self.rot_body
-        this_pos = self.pos_body
-        that_orig = ref_body.pos_body
+        # Make copies of the position, rotation and origins
+        this_rot = self.rot_body.copy()
+        this_pos = self.pos_body.copy()
+        that_orig = ref_body.pos_body.copy()
 
+        # Sub in numeric values
         for s, v in sub_vals.items():
             this_pos = this_pos.subs(s, v)
             this_rot = this_rot.subs(s, v)
             that_orig = that_orig.subs(s, v)
 
-        this_pos = np.array(this_pos.tolist()).astype(float)
-        this_rot = np.array(this_rot.tolist()).astype(float)
-        that_orig = np.array(that_orig.tolist()).astype(float)
+        # Convert to numpy array
+        this_pos = self.__sym_to_np(this_pos)
+        this_rot = self.__sym_to_np(this_rot)
+        that_orig = self.__sym_to_np(that_orig)
 
-        body_corners = np.block(body_corners)
-        rot_body_corners = (this_pos + this_rot @ body_corners.T).T
-
-        # ax.scatter3D(body_corners[:, 0], body_corners[:, 1], body_corners[:, 2], c='r')
-        ax.scatter3D(
-            rot_body_corners[:, 0],
-            rot_body_corners[:, 1],
-            rot_body_corners[:, 2],
-            c="k",
-        )
+        # Plot the COM
         ax.scatter3D(this_pos[0, 0], this_pos[1, 0], this_pos[2, 0], c="k")
 
+        # plot the vector from the base COM to this body's COM
         ax.plot3D(*np.hstack((that_orig, this_pos)).tolist(), c="k", linewidth=0.5)
         ax.text(
             (this_pos + that_orig)[0, 0] / 2,
@@ -140,26 +145,47 @@ class Body(Configuration):
             ),
         )
 
-        body_dims = np.diag([l.item(), w.item(), h.item()])
+        # Dimension plotting
+        # Move translate and rotate corners into global frame
+        rot_body_corners = (this_pos + this_rot @ body_corners.T).T
+        # Plot the body corners
+        ax.scatter3D(
+            rot_body_corners[:, 0],
+            rot_body_corners[:, 1],
+            rot_body_corners[:, 2],
+            c="k",
+            s=2,
+        )
 
+        # label the dimensions of the body
+        # from the 0th index in the body corners,
+        # the:
+        #   length is a vector from the 0th index to the 4th index,
+        #   width is a vector from the 0th index to the 2th index,
+        #   height is a vector from the 0th index to the 1st index.
+        dim_idx = [4, 2, 1]
+        for dim, symbol in zip(dim_idx, self.dims.symbols()):
+            if symbol:
+                v_start = rot_body_corners[0].reshape(-1, 1)
+                v_end = rot_body_corners[dim].reshape(-1, 1)
+                v_dim = np.hstack((v_start, v_end))
+                ax.plot3D(*v_dim.tolist(), c="g", linewidth=1)
+                ax.text(*v_dim.mean(axis=1), symbols_to_latex(symbol), c="g")
+
+        # Plot the principal axes
+        body_dims = np.diag([l.item(), w.item(), h.item()])
         for i in [-1, 1]:
-            rot_body_dims = this_pos + i * this_rot @ body_dims / 2
             rot_body_axes = this_pos + i * this_rot @ body_dims
 
-            # dim_pre = r + i * body_dims
-            for idx, (body, axes) in enumerate(zip(rot_body_dims.T, rot_body_axes.T)):
-                v_body = np.hstack((this_pos, np.array(body).reshape(-1, 1)))
+            for idx, axes in enumerate(rot_body_axes.T):
                 v_axes = np.hstack((this_pos, np.array(axes).reshape(-1, 1)))
-
                 ax.plot3D(*v_axes.tolist(), c="k", linewidth=0.25, linestyle="--")
-                ax.plot3D(*v_body.tolist(), c="k", linewidth=1)
 
                 if (i == 1) and (idx + 3 in self.free_idx):
-                    ax.text(*body, symbols_to_latex(self.positions()[idx + 3]))
-
-            # for idx, col in enumerate(dim_pre.T):
-            #     v = np.hstack((r, np.array(col).reshape(-1, 1)))
-            #     ax.plot3D(*v.tolist(), c='k', linewidth=0.5, linestyle="--")
+                    ax.text(
+                        *that_orig.reshape(-1,).tolist(),
+                        symbols_to_latex(self.positions()[idx + 3]),
+                    )
 
         return ax
 
@@ -188,39 +214,3 @@ def symbols_to_latex(symbols, prefix=None):
         return lat_str
     else:
         return f"${prefix} = " + lat_str[1:]
-
-
-# l = 2
-# b0 = Body(0, 0)
-# b1 = Body(1, l)
-# b2 = Body(1, 2*l)
-
-# # Cart on the ground
-# p0 = BodyCoordinate("O")
-# p1 = BodyCoordinate("G1/O", 0, 0, 0)
-# j1 = Joint(p0, p1, [DOF(0,)])
-
-# # Link on cart
-# p2 = BodyCoordinate("A/G1", 0, 0, 0)
-# p3 = BodyCoordinate("G2/A", l, 0, 0)
-# j2 = Joint(p2, p3, [DOF(4,)])
-
-# # Body force
-# p_F1 = BodyCoordinate("F1", 0, 0, 0)
-# F_1 = BodyForce("1", p_F1, x_dir=True)
-# T_1 = BodyTorque("2", y_dir=True)
-
-# # Add force to trolley
-# b1.add_force(F_1)
-# # Add torque to the arm
-# b2.add_torque(T_1)
-
-# # Create the system
-# # A rigid body is just a collection of connected Bodies
-# body = MultiBody([
-#     Connection(b0, j1, b1),
-#     Connection(b1, j2, b2),
-# ])
-
-# body.el_equations()
-# body.calculate_forces()
