@@ -8,6 +8,7 @@ import sympy as sym
 
 from ..configuration import Configuration, DimensionSymbols
 from ..inertia import InertiaMatrix, MassMatrix
+from ..output import Arrow3D
 from .BodyCoordinate import BodyCoordinate
 from .BodyForce import BodyForce, BodyTorque
 
@@ -18,22 +19,17 @@ GROUND_NAME = "0"
 
 class Body(Configuration):
     id_counter = 1
-    body_names = []
 
     def __init__(self, name=None):
-        if (name in Body.body_names) and (name != GROUND_NAME):
-            raise ValueError("Body name already exists.")
-        elif name != GROUND_NAME:
-            # Body accounting
-            self.body_id = Body.id_counter
-            Body.id_counter += 1
+
+        # Body accounting
+        self.body_id = Body.id_counter
+        Body.id_counter += 1
 
         if name is None:
             self.name = str(self.body_id)
         else:
             self.name = str(name)
-
-        Body.body_names.append(self.name)
 
         # Initialise the Configuration object
         super().__init__(self.name)
@@ -100,71 +96,124 @@ class Body(Configuration):
         if ref_body is None:
             ref_joint = np.zeros((3, 1))
 
-        # Get body dimensions
-        l, w, h = self.dims.values()
-
-        # get all the combinations of body_corners as a np array
-        body_corners = np.array(
-            np.meshgrid(
-                [-l.item() / 2, l.item() / 2],
-                [-w.item() / 2, w.item() / 2],
-                [-w.item() / 2, w.item() / 2],
-            )
-        ).T.reshape(-1, 3)
-
-        # Make copies of the position, rotation and origins
-        this_rot = self.rot_body.copy()
-        half_rot = self.rot_body.copy()
-        this_pos = self.pos_body.copy()
-        that_orig = ref_body.pos_body.copy()
+        # Make copies of the symbols position, rotation and origins
+        body_rot_max = self.rot_body.copy()
+        half_rot_mat = self.rot_body.copy()
+        body_pos_max = self.pos_body.copy()
+        ref_body_origin = ref_body.pos_body.copy()
 
         # Sub in numeric values
+        body_pos_max = body_pos_max.subs(sub_vals)
+        body_rot_max = body_rot_max.subs(sub_vals)
+        ref_body_origin = ref_body_origin.subs(sub_vals)
+
+        # for the half rot, we want to only rotate THIS body's
+        # values by half. This is used for plotting the angle symbols
         for s, v in sub_vals.items():
             if s in self.symbols():
-                half_rot = half_rot.subs(s, v / 2)
+                half_rot_mat = half_rot_mat.subs(s, v / 2)
             else:
-                half_rot = half_rot.subs(s, v)
-
-            this_pos = this_pos.subs(s, v)
-            this_rot = this_rot.subs(s, v)
-            that_orig = that_orig.subs(s, v)
+                half_rot_mat = half_rot_mat.subs(s, v)
 
         # Convert to numpy array
-        this_pos = self.sym_to_np(this_pos)
-        this_rot = self.sym_to_np(this_rot)
-        that_orig = self.sym_to_np(that_orig)
-        half_rot = self.sym_to_np(half_rot)
+        body_pos_max = self.sym_to_np(body_pos_max)
+        body_rot_max = self.sym_to_np(body_rot_max)
+        ref_body_origin = self.sym_to_np(ref_body_origin)
+        half_rot_mat = self.sym_to_np(half_rot_mat)
+
+        # Plot principal axes and the free rotation angles
+        ax = self.__plot_principal_axes(ax, body_pos_max, body_rot_max)
+        ax = self.__plot_free_angles(ax, ref_joint, half_rot_mat)
+
+        # Dimension plotting
+        ax = self.__plot_body_geometry(ax, body_pos_max, body_rot_max)
 
         # Plot the COM
-        ax.scatter3D(this_pos[0, 0], this_pos[1, 0], this_pos[2, 0], c="k")
+        ax = self.__plot_COM(ax, body_pos_max, body_rot_max, ref_body_origin, ref_body)
+
+        # Plot the forces
+        for force, loc in self.linear_forces:
+            ax = self.__plot_input(ax, force, loc, body_pos_max, body_rot_max, "y", "F")
+
+        for torque, loc in self.linear_torques:
+            ax = self.__plot_input(
+                ax, torque, loc, body_pos_max, body_rot_max, "m", "\\tau"
+            )
+
+        return ax
+
+    def __plot_COM(self, ax, pos_ref, rot_ref, ref_origin, ref_body):
+        # Plot the COM
+        ax.scatter3D(pos_ref[0, 0], pos_ref[1, 0], pos_ref[2, 0], c="k", s=2)
         ax.text(
-            this_pos[0, 0] - 0.2,
-            this_pos[1, 0] - 0.2,
-            this_pos[2, 0] - 0.2,
+            pos_ref[0, 0] - 0.2,
+            pos_ref[1, 0] - 0.2,
+            pos_ref[2, 0] - 0.2,
             "$G_{" + f"{self.name}" + "}$",
             c="k",
+            fontsize="x-small",
         )
+
+        ax = self.__draw_3d_line(ax, ref_origin, pos_ref, "k", 0.5)
+
         # plot the vector from the base COM to this body's COM
-        ax.plot3D(*np.hstack((that_orig, this_pos)).tolist(), c="k", linewidth=0.5)
+        # ax.plot3D(*np.hstack((ref_origin, pos_ref)).tolist(), c="k", linewidth=0.5)
         ax.text(
-            (this_pos + that_orig)[0, 0] / 2,
-            (this_pos + that_orig)[1, 0] / 2,
-            (this_pos + that_orig)[2, 0] / 2,
+            (pos_ref + ref_origin)[0, 0] / 2,
+            (pos_ref + ref_origin)[1, 0] / 2,
+            (pos_ref + ref_origin)[2, 0] / 2,
             symbols_to_latex(
                 self.pos_body - ref_body.pos_body,
                 "p^{G_{" + f"{ref_body.name}" + "}}_{G_{" + f"{self.name}" + "}}",
             ),
+            fontsize="x-small",
         )
 
-        # Dimension plotting
+        return ax
+
+    def __plot_principal_axes(self, ax, pos_ref, rot_ref):
+
+        # Plot the principal axes
+        body_dims = np.diag(self.dims.values().reshape(-1,))
+
+        for i in [-1, 1]:
+            rot_body_axes = pos_ref + i * (2 / 3) * rot_ref @ body_dims
+            for idx, axes in enumerate(rot_body_axes.T):
+                ax = self.__draw_3d_line(
+                    ax, pos_ref, axes, color="k", linewidth=0.25, linestyle="--"
+                )
+
+        return ax
+
+    def __plot_free_angles(self, ax, ref_joint, half_rot_mat):
+        for idx in range(3):
+            if (idx + 3) not in self.free_idx:
+                continue
+
+            base_vector = np.zeros((3, 1))
+            base_vector[(idx + 2) % 3, 0] = 1
+            rot_ax = ref_joint + half_rot_mat @ base_vector
+
+            ax.text(
+                *rot_ax.reshape(-1,).tolist(),
+                symbols_to_latex(self.positions()[idx + 3]),
+                c="m",
+                fontsize="x-small",
+            )
+
+        return ax
+
+    def __plot_body_geometry(self, ax, pos_ref, rot_ref):
+        body_corners = self.__get_body_corners()
+
         # Move translate and rotate corners into global frame
-        rot_body_corners = (this_pos + this_rot @ body_corners.T).T
+        rot_body_corners = (pos_ref + rot_ref @ body_corners.T).T
         # Plot the body corners
         ax.scatter3D(
             rot_body_corners[:, 0],
             rot_body_corners[:, 1],
             rot_body_corners[:, 2],
-            c="k",
+            c="g",
             s=2,
         )
 
@@ -176,36 +225,91 @@ class Body(Configuration):
         #   - h is a vector from the 0th index to the 1st index.
         dim_idx = [2, 4, 1]
         for dim, symbol in zip(dim_idx, self.dims.symbols()):
-            if symbol:
-                v_start = rot_body_corners[0].reshape(-1, 1)
-                v_end = rot_body_corners[dim].reshape(-1, 1)
-                v_dim = np.hstack((v_start, v_end))
-                ax.plot3D(*v_dim.tolist(), c="g", linewidth=1)
-                ax.text(*v_dim.mean(axis=1), symbols_to_latex(symbol), c="g")
+            if not symbol:
+                continue
 
-        # Plot the principal axes
-        body_dims = np.diag(self.dims.values().reshape(-1,))
+            v_start = rot_body_corners[0].reshape(-1, 1)
+            v_end = rot_body_corners[dim].reshape(-1, 1)
+            ax = self.__draw_3d_line(ax, v_start, v_end, "k", 0.5)
+            v_dim = np.hstack((v_start, v_end))
+            ax.text(
+                *v_dim.mean(axis=1), symbols_to_latex(symbol), c="g", fontsize="x-small"
+            )
 
-        for i in [-1, 1]:
-            rot_body_axes = this_pos + i * this_rot @ body_dims
+        # Fill in the rest of the body
+        rest_of_body = [
+            (1, 3),
+            (1, 5),
+            (2, 3),
+            (2, 6),
+            (3, 7),
+            (4, 6),
+            (4, 5),
+            (5, 7),
+            (6, 7),
+        ]
+        for s_idx, e_idx in rest_of_body:
+            ax = self.__draw_3d_line(
+                ax, rot_body_corners[s_idx], rot_body_corners[e_idx], "g", 0.5
+            )
 
-            for idx, axes in enumerate(rot_body_axes.T):
-                v_axes = np.hstack((this_pos, np.array(axes).reshape(-1, 1)))
-                ax.plot3D(*v_axes.tolist(), c="k", linewidth=0.25, linestyle="--")
+        return ax
 
-                if (i == 1) and (idx + 3 in self.free_idx):
-                    base_vector = np.zeros((3, 1))
-                    base_vector[(idx + 2) % 3, 0] = 1
+    def __get_body_corners(self):
+        # Get body dimensions
+        l, w, h = self.dims.values()
+        # get all the combinations of body_corners as a np array
+        body_corners = np.array(
+            np.meshgrid(
+                [-l.item() / 2, l.item() / 2],
+                [-w.item() / 2, w.item() / 2],
+                [-w.item() / 2, w.item() / 2],
+            )
+        ).T.reshape(-1, 3)
 
-                    rot_ax = ref_joint + half_rot @ base_vector
+        return body_corners
 
-                    v_axes = np.hstack((ref_joint, np.array(rot_ax).reshape(-1, 1)))
-                    ax.plot3D(*v_axes.tolist(), c="m", linewidth=0.25, linestyle="-")
-                    ax.text(
-                        *rot_ax.reshape(-1,).tolist(),
-                        symbols_to_latex(self.positions()[idx + 3]),
-                        c="m",
-                    )
+    def __plot_input(
+        self, ax, input_obj, input_loc, pos_ref, rot_ref, color, name_prefix
+    ):
+        input_val = input_obj.values()
+        loc_val = input_loc.values()
+
+        input_val = self.sym_to_np(input_val)
+        input_val = rot_ref @ input_val
+
+        loc_val = self.sym_to_np(loc_val)
+        loc_val = pos_ref + rot_ref @ loc_val
+
+        # Start and end vectors for arrow
+        v_start = loc_val.reshape(-1, 1)
+        v_end = (input_val + loc_val).reshape(-1, 1)
+        v_vec = np.hstack((v_start, v_end))
+
+        # Plot the arrow and add the label
+        arrow = Arrow3D(
+            *v_vec.tolist(), mutation_scale=5, lw=1, arrowstyle="-|>", color=color,
+        )
+        ax.add_artist(arrow)
+        ax.text(
+            *v_end.reshape(-1,),
+            f"${name_prefix}_{input_obj.name}$",
+            c=color,
+            fontsize="x-small",
+        )
+
+        return ax
+
+    def __draw_3d_line(self, ax, p1, p2, color="k", linewidth=1, linestyle="-"):
+        """Draw a 3d line from p1 to p2
+        """
+        p1 = np.array(p1).reshape(-1, 1)
+        p2 = np.array(p2).reshape(-1, 1)
+
+        p_vec = np.hstack((p1, p2))
+
+        # plot the vector from the base COM to this body's COM
+        ax.plot3D(*p_vec.tolist(), c=color, linewidth=linewidth, linestyle=linestyle)
 
         return ax
 

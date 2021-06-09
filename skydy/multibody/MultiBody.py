@@ -2,12 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
-from matplotlib.patches import FancyArrowPatch
-from mpl_toolkits import mplot3d
 from mpl_toolkits.mplot3d import proj3d
 
 from ..connectors import Connection
-from ..output import LatexDocument
+from ..output import Arrow3D, LatexDocument
 from ..rigidbody import Ground
 
 # from sympy.physics.vector.printing import vlatex
@@ -70,8 +68,15 @@ class MultiBody:
         # Ensure first object is ground
         assert isinstance(val[0].body_in, Ground)
 
+        body_names = []
+
         for v in val:
             assert isinstance(v, Connection)
+            if v.body_out.name in body_names:
+                raise ValueError(
+                    "Duplicate body names exist. Ensure bodies are uniquely named."
+                )
+            body_names.append(v.body_out.name)
 
         self._connections = val
 
@@ -322,7 +327,16 @@ class MultiBody:
 
         return latexify(eoms)
 
-    def as_latex(self, linearized=False, output_dir=None):
+    def as_latex(
+        self, linearized=False, output_dir=None, file_name=None, include_diag=True
+    ):
+
+        if output_dir is None:
+            output_dir = "./tex"
+
+        if file_name is None:
+            file_name = "out"
+
         latex_doc = LatexDocument()
         # Coordinates
         _coordinates = self.__latex_coordinates()
@@ -344,19 +358,23 @@ class MultiBody:
         _eoms = self.__latex_eoms(linearized)
         latex_doc.add_section("Equations of Motion", _eoms)
 
+        if include_diag:
+            _, diag_dir = self.draw(output_dir)
+            latex_doc.add_figure(f"Diagram of {self.name}", diag_dir)
+
         latex_doc.write_pdf(f"multibody_{self.name}", output_dir)
 
     def __draw_spatial_axes(self, ax):
         basis_vectors = [
-            (0.2, 0, 0),
-            (0, 0.2, 0),
-            (0, 0, 0.2),
+            (1, 0, 0),
+            (0, 1, 0),
+            (0, 0, 1),
         ]
 
         basis_labels = ["$X$", "$Y$", "$Z$"]
 
         for vec, label in zip(basis_vectors, basis_labels):
-            ax.text(*vec, label, c="r")
+            ax.text(*vec, label, c="r", fontsize="x-small")
 
             basis = [(0, i) for i in vec]
             arrow = Arrow3D(
@@ -387,7 +405,11 @@ class MultiBody:
 
         return ax
 
-    def draw(self):
+    def draw(self, output_dir=None):
+
+        if output_dir is None:
+            output_dir = "./tex"
+
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
         ax.set_axis_off()
@@ -398,13 +420,16 @@ class MultiBody:
                 **sub_vals,
                 **cnx.as_dict(),
             }
-
             ax = cnx.draw(ax=ax, sub_vals=sub_vals)
 
         ax = self.__draw_spatial_axes(ax)
         ax = self.__equalize_axes(ax)
 
-        return ax
+        plt.tight_layout()
+        diag_dir = f"{output_dir}/diagram_{self.name}.pdf"
+        plt.savefig(diag_dir)
+
+        return ax, diag_dir
 
     def symbols(self):
         return self.eom.free_symbols
@@ -415,15 +440,3 @@ def latexify(string_item):
         return "\n".join([latexify(item) for item in string_item])
     else:
         return "\\begin{equation}" + str(string_item) + "\\end{equation} \\\\"
-
-
-class Arrow3D(FancyArrowPatch):
-    def __init__(self, xs, ys, zs, *args, **kwargs):
-        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
-        self._verts3d = xs, ys, zs
-
-    def draw(self, renderer):
-        xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
-        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
-        FancyArrowPatch.draw(self, renderer)

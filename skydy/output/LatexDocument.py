@@ -7,6 +7,7 @@ class LatexDocument:
         self.__begin = (
             "\\documentclass[8pt]{article}\n"
             + "\\usepackage{amsmath}\n"
+            + "\\usepackage[pdftex]{graphicx}\n"
             # + "\n\\usepackage{flexisym}\n"
             # + "\n\\usepackage{breqn}\n"
             + "\\usepackage{geometry}\n"
@@ -15,6 +16,7 @@ class LatexDocument:
         )
         self.__end = "\n\\end{document}"
         self.__sections = {}
+        self.__figures = {}
 
     def __make_section(self, title):
         return "\n\\subsection*{" + str(title) + "}\n"
@@ -28,6 +30,16 @@ class LatexDocument:
         except Exception as e:
             print(e)
             print("Valid Keys:", self.__sections.keys())
+
+    def add_figure(self, figure_name, file_name):
+        self.__figures[figure_name] = (
+            "\\begin{figure}\n"
+            + "\t\\centering\n"
+            + "\t\\includegraphics{"
+            + str(file_name)
+            + "}\n"
+            + "\\end{figure}"
+        )
 
     def __replace_and_remove(self, latex_doc):
         remove_strs = [
@@ -53,14 +65,10 @@ class LatexDocument:
             sections += self.__make_section(title)
             sections += tex
 
-        latex_doc = self.__begin + sections + self.__end
+        figures = "".join(list(self.__figures.values()))
+
+        latex_doc = self.__begin + figures + sections + self.__end
         latex_doc = self.__replace_and_remove(latex_doc)
-
-        if output_dir is None:
-            output_dir = "./tex"
-
-        if file_name is None:
-            file_name = "out"
 
         with open(f"{output_dir}/{file_name}.tex", "w") as text_file:
             text_file.write(latex_doc)

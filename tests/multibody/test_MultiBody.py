@@ -228,7 +228,7 @@ def test_MultiBody_draw():
     j1 = Joint(p0, p1, [DOF(0,)], name="O")
 
     # Add force to cart. Force is applied at the COM
-    F1 = BodyForce(1, x_dir=True)
+    F1 = BodyForce(name="1", x_dir=True)
     force_loc = BodyCoordinate("PF1", 0, 0, 0)
     b_car.add_force(F1, force_loc)
 
@@ -239,9 +239,8 @@ def test_MultiBody_draw():
     # A rigid body is just a collection of connected Bodies
     body = MultiBody([cnx_car,])
 
-    ax = body.draw()
-    plt.tight_layout()
-    plt.show()
+    # body.draw()
+    body.as_latex()
 
     del body
     # Pendulum
@@ -264,41 +263,46 @@ def test_MultiBody_draw():
 
     # body.add_connection(cnx_pen_1)
     body = MultiBody([cnx_pen_1,])
+    body.as_latex()
+    # body.draw()
 
-    ax = body.draw()
-    plt.tight_layout()
-    plt.show()
-    print("\n===Cart Pendulum===")
-    l = 2
-    b_car = Body("c")
-    b_pen = Body("p")
+    # print("\n===Cart Pendulum===")
+    # l = 2
+    # b_car = Body("c")
+    # b_pen = Body("p")
+    # b_car.dims.assign_values([l, l/4, l/4])
+    # b_pen.dims.assign_values([2 * l, 0, 0])
 
-    b_car.dims.assign_values([4, 1, 1])
-    b_pen.dims.assign_values([2 * l, 0, 0])
+    # p0 = BodyCoordinate("O", 0, 0, 0)
+    # p1 = BodyCoordinate("Gc/O", 0, 0, l/8)
+    # p2 = BodyCoordinate("A/Gc", 0, 0, l/8)
+    # p3 = BodyCoordinate("Gp/A", l, 0, 0)
 
-    p0 = BodyCoordinate("O", 0, 0, 0)
-    p1 = BodyCoordinate("Gc/O", 0, 0, 0)
-    p2 = BodyCoordinate("A/Gc", 0, 0, 0)
-    p3 = BodyCoordinate("Gp/A", l, 0, 0)
+    # F1 = BodyForce(name="1", x_dir=True)
+    # force_loc = BodyCoordinate("PF1", 0, 0, 0)
+    # b_car.add_force(F1, force_loc)
 
-    j1 = Joint(p0, p1, [DOF(0,)], name="O")
-    j2 = Joint(p2, p3, [DOF(4,)], name="A")
+    # T1 = BodyTorque(1, y_dir=True)
+    # torque_loc = BodyCoordinate("PT1", -l, 0, 0)
+    # b_pen.add_torque(T1, torque_loc)
 
-    cnx_car = Connection(b_gnd, j1, b_car)
-    cnx_pen = Connection(b_car, j2, b_pen)
+    # j1 = Joint(p0, p1, [DOF(0,)], name="O")
+    # j2 = Joint(p2, p3, [DOF(4,)], name="A")
 
-    body = MultiBody([cnx_car, cnx_pen])
+    # cnx_car = Connection(b_gnd, j1, b_car)
+    # cnx_pen = Connection(b_car, j2, b_pen)
 
-    ax = body.draw()
-    plt.tight_layout()
-    plt.show()
-    del body
+    # body = MultiBody([cnx_car, cnx_pen])
+
+    # body.as_latex()
+
+    # del body
     print("\n===Double Pendulum===")
 
-    b_pen_1 = Body("p1")
+    b_pen_1 = Body("1")
     b_pen_1.dims.assign_values([4 * l, 0, 0])
 
-    p1 = BodyCoordinate("Gp1/O", 2 * l, 0, 0)
+    p1 = BodyCoordinate("G1/O", 2 * l, 0, 0)
     j1 = Joint(p0, p1, [DOF(4,)], name="O")
 
     # Add force to cart. Force is applied at the COM
@@ -309,10 +313,10 @@ def test_MultiBody_draw():
     cnx_pen_1 = Connection(b_gnd, j1, b_pen_1)
 
     # Pendulum
-    b_pen_2 = Body("p2")
+    b_pen_2 = Body("2")
     b_pen_2.dims.assign_values([2 * l, 0, 0])
-    p2 = BodyCoordinate("A/Gp1", l, 0, 0)
-    p3 = BodyCoordinate("Gp2/A", l, 0, 0)
+    p2 = BodyCoordinate("A/G1", l, 0, 0)
+    p3 = BodyCoordinate("G2/A", l, 0, 0)
     j2 = Joint(p2, p3, [DOF(4,)], name="A")
 
     # Add force to cart. Force is applied at the COM
@@ -324,6 +328,4 @@ def test_MultiBody_draw():
 
     body = MultiBody([cnx_pen_1, cnx_pen_2])
 
-    ax = body.draw()
-    plt.tight_layout()
-    plt.show()
+    body.as_latex()
