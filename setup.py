@@ -3,6 +3,19 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+skydy_packages = (
+    [
+        "skydy",
+        "skydy.connectors",
+        "skydy.configuration",
+        "skydy.inertia",
+        "skydy.multibody",
+        "skydy.connectors",
+        "skydy.output",
+        "skydy.rigidbody",
+    ],
+)
+
 setuptools.setup(
     name="skydy",
     version="0.0.1",
@@ -20,8 +33,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "skydy"},
-    packages=setuptools.find_packages(where="skydy"),
+    packages=skydy_packages,
     python_requires=">=3.6",
-    install_requires=["numpy", "sympy",],
+    install_requires=["numpy", "sympy", "matplotlib"],
 )

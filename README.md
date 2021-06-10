@@ -17,42 +17,66 @@ _Contents:_
 
 ## Background
 
-This repository has been developed as a common starting point for application development. It has a standard structure and common set of tooling to ensure accuracy and consistency across all applications.
+The purpose of this repository is to provide a way to programmatically define an
+inter-connected mechnical system (IMCS) -- a collection of rigid bodies -- to ultimately determine its:
+- Coorinate system
+- Forward Kinematic Maps
+- Kinetic and Potential Energy
+- Kinetic Energy Metric
+- Generalised Forces
+- Equations of motion
+- Forced and Unforced Equilibria
 
-Naming conventions for repositories:
+The idea is to have a fully integrated way to define and describe IMCS, and produce useful content. Note, we refer the user to Geometric Control of Mechanical Systems (Bullo & Lewis) for definitions and descriptons used throughout.
 
-| Valid | Invalid |
-|---|---|
-|`-`, Capital Letters, Lowercase Letters | `_`
-|---|---|
-|A-Legitimate-Repository | an_illegitemate_repository
+IMCS are typically "simple" to scribble on paper, but even with two bodies, the book-keeping and accounting
+on the rotation matrices alone, makes the accurate modelling task cumbersome and error prone. This repository is here to (help) solve that.
+
+The goal is to be able to take a schematic drawing from paper, and by methodically using code,
+define the body, or collection of bodies. The output of this effort can be one, or many of the following:
+1. A diagram of the IMCS.
+2. A latex document (and PDF), deriving the equations of motion.
+3. A symbolic representation, that can be used a starting point for simulating.
+
+This repository relies on the principle that any system is simply a collection of independent bodies connected, via joints, in different configurations. **All definitions and descriptions are done in a Body's coordinate frame.** As such, the mainstays of this repository are the following classes:
+- Body: a Body is simply a collection of particles. It has a mass, and some dimensions (length, width and height).
+- Joint: a Joint is something that provides, or constraints degrees of freedom (DOFs), and ultimately dictates the coordinates (or variables) a Body will have.
+- Connection: a connection involves two bodies (and input and output), and a joint. By definition, the joint is assumed to be fixed at a user prescribed location in the input Body coordinate frame. Also, the output body is attached at a user presribed location in its coordinate frame.
+- BodyCoordindate: for Body, defines an (x,y,z) triple in the body coordinate frame, the location of which can be made global once we connect bodies to one another, and ultimate give our system a Ground reference point. More on that later.
 
 ## Installation & Usage
 
-1. From this repository, click the "Use this template" button.
-2. Name your repository appropriately (see [Background](#Background)).
-3. Clone the new repository and navigate to its directory.
-4. Run the starup script `start_new_repo.sh`, which will:
-  	- initialise the submodule,
-  	- push the modified repository to Github, then
-  	- delete the script.
+### Installation
 
-Once this is done, you are ready to start development of your new application.
+1. Build from this repository:
+    1. Build a local copy of the package (note for this to work, you must have python3-tk and pdflatex installed on your machine):
+        1. `git clone ...`
+        2. `cd skydy`
+        3. `pip install --upgrade .`
+    2. Using Docker:
+        1. `git clone ...`
+        2. `cd skydy`
+        3. `make build`
+2. Using pip and PyPi:
+    1. `pip install skydy`
 
-Ensure you update the Background and Installation & Usage sections so that they relate to your application.
+### Usage
+
+We encourage the reader to review the `examples` folder for some basic examples.
+
+For step-by-step development, the user is encouraged to run their code in an interactive notebook. The Docker image associated with this reporsitory has Jupyter installed. To enter an interactive session, simply run `jupyter notebook --allow-root` from the container and copy and paste the address the terminal provides into your browser of choice.
 
 ## Running
 
-For this repository to function as intended, a few tools have been provided to ensure the application can be containerised and sent to the appropriate container repository.
+For this repository to function as intended, a few tools have been provided to ensure the application can be containerised.
 
 ### Makefile
 
 The content of the `Makefile` should only be modified if the standard behaviour is not achieved using the default. Standard commands are as follows:
 
-| Command | Dependencies | Action | Image Tag (local and remote)
-----------------------|---|---|---
-`make publish` | `build upload` | Builds and uploads image | Git commit's tag, otherwise `latest`
-`make publish TAG=custom_tag` | `build upload` | Builds and uploads image | `custom_tag`
+| Command  | Action | Image Tag (local and remote)
+----------------------|---|---
+`make run` | Runs a local image | Git commit's tag, otherwise `latest`
 
 ### Scripts
 
@@ -61,11 +85,21 @@ The `scripts` folder must maintain the following, which are indirectly run from 
 | Script   | Inputs |Output|
 |----------|------ |---
 | build.sh  | NAME TAG | Application image is created locally, tagged with input args |
-| upload.sh | NAME TAG | Application image is uploaded to container repository, tagged with input args |
 | run.sh    | NAME TAG | Application image is run locally |
+| dev.sh    | NAME TAG | Application image is run locally, with screen privilidges for plotting and development purposes |
 
 ## Contributing
 The guidelines for contributing are laid out here. All members of the team have write access.
+
+### TODO
+What I want to get done:
+[] Add mass data to a Body for MassMatrix and InertiaMatrix.
+[] Faster Forward Kinemtics
+[] Sympy to Numpy
+[] Rotating forces
+[] Simulations:
+    [] User defined inputs.
+    [] Calculate controls, etc.
 
 ### Development Environment
 - Install [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for creating a nice virtual container to run in.
@@ -75,7 +109,11 @@ The guidelines for contributing are laid out here. All members of the team have 
 No untested code will be allowed to merge onto Master. A 90% coverage and test passing report is required for all Master PRs.
 
 #### Using PyTest
-This library uses pytest for testing. To run the full test suite use the command `pytest tests/ --cov=lib --cov-report=html`.
+This library uses pytest for testing. To run the full test suite use the command `pytest tests/ --cov=skydy --cov-report=html`.
+
+Take note of the marks in `pytest.ini`. To run specific tests, say only on the "rigidbody" module, run `pytest tests/ --cov=skydy --cov-report=html -m rigidbody`.
+
+One can use the args `-vv -s` to get detailed print outs during testing, i.e., `pytest tests/ --cov=skydy --cov-report=html -vv -s`
 
 ### Code Style
 Code style is handled and enforced with [Black](https://github.com/psf/black), [Flake8](https://gitlab.com/pycqa/flake8) and some additional stylers and formatters. A pre-commit hook is provided with this repository so that all code is automatically kept consistent. If there are any issues with formatting, please submit a formal PR to this repository.

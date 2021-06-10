@@ -11,3 +11,8 @@ class BodyCoordinate(DimensionSymbols):
         self.assign_values(x, 0)
         self.assign_values(y, 1)
         self.assign_values(z, 2)
+
+
+class GroundCoordinate(BodyCoordinate):
+    def __init__(self):
+        super().__init__("O")

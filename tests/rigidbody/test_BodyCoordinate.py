@@ -35,3 +35,13 @@ def test_BodyCoordinate():
     body_coord = BodyCoordinate(body_name, x_coord, y_coord, z_coord)
 
     assert body_coord.symbols()[1] == y_coord
+
+
+@pytest.mark.rigidbody
+def GroundCoordinate():
+    from skydy.rigidbody import GroundCoordinate
+
+    p_gnd = GroundCoordinate()
+
+    print(p_gnd.symbols())
+    print(p_gnd.values())

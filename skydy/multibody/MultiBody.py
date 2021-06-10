@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
@@ -9,6 +11,7 @@ from ..output import Arrow3D, LatexDocument
 from ..rigidbody import Ground
 
 # from sympy.physics.vector.printing import vlatex
+DIR_NAME = "./out"
 
 
 class MultiBody:
@@ -331,8 +334,7 @@ class MultiBody:
         self, linearized=False, output_dir=None, file_name=None, include_diag=True
     ):
 
-        if output_dir is None:
-            output_dir = "./tex"
+        output_dir = self.__get_output_dir(output_dir)
 
         if file_name is None:
             file_name = "out"
@@ -405,11 +407,17 @@ class MultiBody:
 
         return ax
 
-    def draw(self, output_dir=None):
-
+    def __get_output_dir(self, output_dir):
         if output_dir is None:
-            output_dir = "./tex"
+            if not os.path.exists(DIR_NAME):
+                os.mkdir(DIR_NAME)
 
+            output_dir = DIR_NAME
+
+        return output_dir
+
+    def draw(self, output_dir=None, save_fig=True):
+        output_dir = self.__get_output_dir(output_dir)
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
         ax.set_axis_off()
@@ -425,11 +433,12 @@ class MultiBody:
         ax = self.__draw_spatial_axes(ax)
         ax = self.__equalize_axes(ax)
 
-        plt.tight_layout()
-        diag_dir = f"{output_dir}/diagram_{self.name}.pdf"
-        plt.savefig(diag_dir)
+        if save_fig:
+            output_dir = f"{output_dir}/diagram_{self.name}.pdf"
+            plt.tight_layout()
+            plt.savefig(output_dir)
 
-        return ax, diag_dir
+        return ax, output_dir
 
     def symbols(self):
         return self.eom.free_symbols
