@@ -37,6 +37,8 @@ workspace/*
 /dist/*
 tex/*
 .ipynb*
+examples/out*
+out*
 
 # Do not ignore
 !requirements.txt
