@@ -130,7 +130,7 @@ class Body(Configuration):
         ax = self.__plot_body_geometry(ax, body_pos_mat, body_rot_mat)
 
         # Plot the COM
-        ax = self.__plot_COM(ax, body_pos_mat, body_rot_mat, ref_body_origin, ref_body)
+        ax = self.__plot_COM(ax, body_pos_mat, ref_body_origin, ref_body)
 
         # Plot the forces
         for force, loc in self.linear_forces:
@@ -143,7 +143,7 @@ class Body(Configuration):
 
         return ax
 
-    def __plot_COM(self, ax, pos_ref, rot_ref, ref_origin, ref_body):
+    def __plot_COM(self, ax, pos_ref, ref_origin, ref_body):
         # Plot the COM
         ax.scatter3D(pos_ref[0, 0], pos_ref[1, 0], pos_ref[2, 0], c="k", s=2)
         ax.text(
