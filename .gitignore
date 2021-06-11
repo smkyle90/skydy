@@ -41,11 +41,8 @@ examples/python/out*
 examples/notebooks/out*
 out/*
 
-
-
-
 # Do not ignore
 !requirements.txt
 !.placeholder
 
-!examples/*.ipynb
+!examples/notebooks/*.ipynb

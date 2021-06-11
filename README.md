@@ -51,19 +51,19 @@ This repository relies on the principle that any system is simply a collection o
 
 1. Build from this repository:
     1. Build a local copy of the package (note for this to work, you must have python3-tk and pdflatex installed on your machine):
-        1. `git clone ...`
+        1. `git clone https://github.com/smkyle90/skydy.git`
         2. `cd skydy`
         3. `pip install --upgrade .`
     2. Using Docker:
-        1. `git clone ...`
+        1. `git clone https://github.com/smkyle90/skydy.git`
         2. `cd skydy`
         3. `make build`
 2. Using pip and PyPi:
-    1. `pip install skydy`. Dependencies for this include `python3-tk` and `pdflatex`.
+    1. `pip install skydy`. OS level dependencies for this method include `python3-tk` and `pdflatex`.
 
 ### Usage
 
-We encourage the reader to review the `examples` folder for some basic examples. There are `python` files as well as interative notebooks to review. The collection of examples are the simplest, yet most common systems that this modelling methodology is completed on and include:
+We encourage the reader to review the [`examples`](https://github.com/smkyle90/skydy/tree/main/examples) folder for some basic examples. There are useable `.py` files in the `python` directory, as well as interative notebooks. The collection of examples are the simplest, yet most common systems that this modelling methodology is completed on and include:
 1. A one-dimensional cart that moves in the x-coordinate.
 2. A one-dimensional pendulum that rotates about an axis.
 3. A cart-pendulum -- a combination of the two systems above.
