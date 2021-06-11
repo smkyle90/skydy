@@ -29,10 +29,8 @@ htmlcov
 
 # Folders and directories
 __pycache__
-
-# Work folder for application.
-# Store all dev files here.
-# Anything in this file will NOT be uploaded to the git repo, and ignored in the Docker build.
+build*
+dist*
 workspace/*
 /dist/*
 tex/*
