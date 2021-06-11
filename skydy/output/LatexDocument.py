@@ -11,7 +11,7 @@ class LatexDocument:
             # + "\n\\usepackage{flexisym}\n"
             # + "\n\\usepackage{breqn}\n"
             + "\\usepackage{geometry}\n"
-            + "\\geometry{margin=1cm}\n"
+            + "\\geometry{margin=1.5cm}\n"
             + "\\begin{document}\n"
         )
         self.__end = "\n\\end{document}"

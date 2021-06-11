@@ -52,22 +52,27 @@ class Connection:
             if not dof.free:
                 self.body_out.apply_constraint(dof.idx, dof.const_value)
 
-        # Propagate rotations
+        # Propagate rotations from input body to output body
         self.body_out.rot_body = sym.simplify(
             self.body_in.rot_body @ self.body_out.rot_body
         )
 
         # Get absolute positions
-        p_in = self.body_in.pos_body  # global coordinate of input link
+        # Global coordinate of COM of input link
+        p_in = self.body_in.pos_body
+
+        # Rotated position of joint on input link
         p_j_in = sym.simplify(
             self.body_in.rot_body @ self.joint.body_in_coord.symbols()
-        )  # global position of connection on input link
+        )
+
+        # Global position of COM of output link to joint
         p_out_j = sym.simplify(
             self.body_out.rot_body @ self.joint.body_out_coord.symbols()
-        )  # global position of output link to joint
-        add_dof = sym.simplify(
-            self.body_out.rot_body @ self.body_out.pos_body
-        )  # additional dofs from joint
+        )
+
+        # Additional DOFs from joint, in the input links coordinate Frame.
+        add_dof = sym.simplify(self.body_in.rot_body @ self.body_out.pos_body)
 
         self.body_out.pos_body = sym.simplify(p_in + p_j_in + p_out_j + add_dof)
 

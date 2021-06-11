@@ -6,17 +6,9 @@ The base case is an object that can move in one-dimension,
 along a line. It has one input force, co-linear with the
 direction of motion.
 """
-import skydy
 from skydy.connectors import DOF, Connection, Joint
 from skydy.multibody import MultiBody
-from skydy.rigidbody import (
-    Body,
-    BodyCoordinate,
-    BodyForce,
-    BodyTorque,
-    Ground,
-    GroundCoordinate,
-)
+from skydy.rigidbody import Body, BodyCoordinate, BodyForce, Ground, GroundCoordinate
 
 # For this example, the car will be able to move in the body x-coordinate.
 # For simplicity, this coordinate will align the the global x-coordinate.
@@ -101,3 +93,9 @@ cnx_car = Connection(b_gnd, j1, b_car)
 # Create the MultiBody system - a rigid body is just a collection of connected Bodies.
 # It is required that the first connection is to the ground.
 oned_car = MultiBody([cnx_car,])
+
+# Draw the system
+oned_car.draw()
+
+# Create the latex
+oned_car.as_latex()

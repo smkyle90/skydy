@@ -3,18 +3,16 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-skydy_packages = (
-    [
-        "skydy",
-        "skydy.connectors",
-        "skydy.configuration",
-        "skydy.inertia",
-        "skydy.multibody",
-        "skydy.connectors",
-        "skydy.output",
-        "skydy.rigidbody",
-    ],
-)
+skydy_packages = [
+    "skydy",
+    "skydy.connectors",
+    "skydy.configuration",
+    "skydy.inertia",
+    "skydy.multibody",
+    "skydy.connectors",
+    "skydy.output",
+    "skydy.rigidbody",
+]
 
 setuptools.setup(
     name="skydy",

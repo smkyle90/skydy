@@ -197,7 +197,11 @@ class MultiBody:
         return coord_eum, force_eum
 
     def force_symbols(self):
-        return list(set(self.gen_forces.free_symbols) - set(self.coordinates))
+        return list(
+            set(self.gen_forces.free_symbols)
+            - set(self.coordinates)
+            - set([sym.Symbol("t")])
+        )
 
     def eoms(self):
         return self.__lhs, self.__rhs

@@ -43,3 +43,5 @@ out*
 # Do not ignore
 !requirements.txt
 !.placeholder
+
+!examples/*.ipynb

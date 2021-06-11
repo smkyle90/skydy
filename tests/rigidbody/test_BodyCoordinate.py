@@ -12,7 +12,7 @@ def test_BodyCoordinate():
     body_coord = BodyCoordinate(body_name)
 
     assert body_coord.name == body_name
-    for k, v in body_coord.as_dict().items():
+    for _k, v in body_coord.as_dict().items():
         assert v == 0
 
     # Run methods
@@ -38,7 +38,7 @@ def test_BodyCoordinate():
 
 
 @pytest.mark.rigidbody
-def GroundCoordinate():
+def test_GroundCoordinate():
     from skydy.rigidbody import GroundCoordinate
 
     p_gnd = GroundCoordinate()

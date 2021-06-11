@@ -17,9 +17,9 @@ class Configuration(CoordinateSymbols):
         self.__pos_free = sym.Matrix(q[:3])
 
         # Define the rotation matrices for each axis
-        Rx = sym.rot_axis3(q[3]).T
+        Rx = sym.rot_axis1(q[3]).T
         Ry = sym.rot_axis2(q[4]).T
-        Rz = sym.rot_axis1(q[5]).T
+        Rz = sym.rot_axis3(q[5]).T
         self.__rot_free = sym.simplify(Rz @ Ry @ Rx)
 
         self.pos_body = None

@@ -1,4 +1,4 @@
-pip inpytest==5.3.5
+pytest==5.3.5
 PyYAML==5.3.1
 pre-commit==2.6.0
 pylint==2.5.3
