@@ -93,18 +93,21 @@ class Body(Configuration):
         if ref_body is None:
             ref_body = Ground()
 
-        if ref_body is None:
+        if ref_joint is None:
             ref_joint = np.zeros((3, 1))
 
+        if not sub_vals:
+            sub_vals = self.as_dict()
+
         # Make copies of the symbols position, rotation and origins
-        body_rot_max = self.rot_body.copy()
+        body_rot_mat = self.rot_body.copy()
         half_rot_mat = self.rot_body.copy()
-        body_pos_max = self.pos_body.copy()
+        body_pos_mat = self.pos_body.copy()
         ref_body_origin = ref_body.pos_body.copy()
 
         # Sub in numeric values
-        body_pos_max = body_pos_max.subs(sub_vals)
-        body_rot_max = body_rot_max.subs(sub_vals)
+        body_pos_mat = body_pos_mat.subs(sub_vals)
+        body_rot_mat = body_rot_mat.subs(sub_vals)
         ref_body_origin = ref_body_origin.subs(sub_vals)
 
         # for the half rot, we want to only rotate THIS body's
@@ -116,28 +119,28 @@ class Body(Configuration):
                 half_rot_mat = half_rot_mat.subs(s, v)
 
         # Convert to numpy array
-        body_pos_max = self.sym_to_np(body_pos_max)
-        body_rot_max = self.sym_to_np(body_rot_max)
+        body_pos_mat = self.sym_to_np(body_pos_mat)
+        body_rot_mat = self.sym_to_np(body_rot_mat)
         ref_body_origin = self.sym_to_np(ref_body_origin)
         half_rot_mat = self.sym_to_np(half_rot_mat)
 
         # Plot principal axes and the free rotation angles
-        ax = self.__plot_principal_axes(ax, body_pos_max, body_rot_max)
+        ax = self.__plot_principal_axes(ax, body_pos_mat, body_rot_mat)
         ax = self.__plot_free_angles(ax, ref_joint, half_rot_mat)
 
         # Dimension plotting
-        ax = self.__plot_body_geometry(ax, body_pos_max, body_rot_max)
+        ax = self.__plot_body_geometry(ax, body_pos_mat, body_rot_mat)
 
         # Plot the COM
-        ax = self.__plot_COM(ax, body_pos_max, body_rot_max, ref_body_origin, ref_body)
+        ax = self.__plot_COM(ax, body_pos_mat, body_rot_mat, ref_body_origin, ref_body)
 
         # Plot the forces
         for force, loc in self.linear_forces:
-            ax = self.__plot_input(ax, force, loc, body_pos_max, body_rot_max, "y", "F")
+            ax = self.__plot_input(ax, force, loc, body_pos_mat, body_rot_mat, "y", "F")
 
         for torque, loc in self.linear_torques:
             ax = self.__plot_input(
-                ax, torque, loc, body_pos_max, body_rot_max, "m", "\\tau"
+                ax, torque, loc, body_pos_mat, body_rot_mat, "m", "\\tau"
             )
 
         return ax
@@ -163,7 +166,7 @@ class Body(Configuration):
             (pos_ref + ref_origin)[1, 0] / 2,
             (pos_ref + ref_origin)[2, 0] / 2,
             symbols_to_latex(
-                self.pos_body - ref_body.pos_body,
+                sym.simplify(self.pos_body - ref_body.pos_body),
                 "p^{G_{" + f"{ref_body.name}" + "}}_{G_{" + f"{self.name}" + "}}",
             ),
             fontsize="x-small",

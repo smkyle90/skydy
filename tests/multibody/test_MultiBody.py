@@ -6,200 +6,122 @@ import pytest
 from mpl_toolkits import mplot3d
 
 
+def print_result(body):
+    print(f"==={body.name.upper()}===")
+    print(f"{body.name} coordinates:", body.coordinates)
+    print(f"{body.name} bodies:", body.bodies)
+    print(f"{body.name} forces")
+    for p, f, _ in body.forces:
+        print(f"{body.name} Pos:", p)
+        print(f"{body.name} Dir:", f)
+    print(f"{body.name} torques")
+    for _, t, _ in body.torques:
+        print(t)
+
+    print(f"{body.name} kinetic_energy:", body.kinetic_energy)
+    print(f"{body.name} potential_energy:", body.potential_energy)
+    print(f"{body.name} Symbols:", body.symbols())
+    LHS, RHS = body.eoms()
+    print(f"{body.name} LHS EOM:", LHS)
+    print(f"{body.name} RHS EOM:", RHS)
+    A, B = body.system_matrices()
+    print(f"{body.name} Nonlinear A:", A)
+    print(f"{body.name} Nonlinear B:", B)
+
+    A, B = body.system_matrices(True)
+    print(f"{body.name} Linear A:", A)
+    print(f"{body.name} Linear B:", B)
+
+    q0, f0 = body.get_equilibria()
+    print(f"{body.name} coordinate eum:", q0)
+    print(f"{body.name} force eum:", f0)
+    print(f"{body.name} config:", body.get_configuration())
+
+
 @pytest.mark.multibody
-def test_MultiBody():
-    from skydy.connectors import DOF, Connection, Joint
+def test_MultiBody(
+    cart, pendulum, hovercraft, cart_pendulum, double_pendulum,
+):
     from skydy.multibody import MultiBody
-    from skydy.rigidbody import Body, BodyCoordinate, BodyForce, BodyTorque, Ground
 
-    # # Dimension of half a link
-    l = 2
+    # Empty multibody
+    m1 = MultiBody()
 
-    # Create 2 bodies. Ground, and single mass
-    b_gnd = Ground()
-    p0 = BodyCoordinate("O")
+    # Empty list
+    m2 = MultiBody([])
 
-    print("\n===1DOF===")
-    b_car = Body("car")
+    print_result(cart)
+    print_result(pendulum)
+    print_result(hovercraft)
+    print_result(cart_pendulum)
+    print_result(double_pendulum)
 
-    # Link in a pivot on the ground.
-    p1 = BodyCoordinate("G1/O", 0, 0, 0)
-
-    # add the joint, with a sliding DOF in the x-direction
-    j1 = Joint(p0, p1, [DOF(0,)], name="O")
-
-    # Add force to cart. Force is applied at the COM
-    F1 = BodyForce(1, x_dir=True)
-    force_loc = BodyCoordinate("PF1", 0, 0, 0)
-    b_car.add_force(F1, force_loc)
-
-    # Connect the two bodies through the joint
-    cnx_car = Connection(b_gnd, j1, b_car)
-
-    # Create the system
-    # A rigid body is just a collection of connected Bodies
-    body = MultiBody([cnx_car,])
-
-    print("coordinates", body.coordinates)
-    print("bodies", body.bodies)
-    print("forces")
-    for p, f, _ in body.forces:
-        print("Pos", p)
-        print("Dir", f)
-    print("torques")
-    for _, t, _ in body.torques:
-        print(t)
-
-    print("kinetic_energy", body.kinetic_energy)
-    print("potential_energy", body.potential_energy)
-    print("Symbols", body.symbols())
-    LHS, RHS = body.eoms()
-    print("LHS EOM", LHS)
-    print("RHS EOM", RHS)
-    A, B = body.system_matrices()
-    print("Nonlinear A", A)
-    print("Nonlinear B", B)
-
-    A, B = body.system_matrices(True)
-    print("Linear A", A)
-    print("Linear B", B)
-
-    q0, f0 = body.get_equilibria()
-    print("coordinate eum", q0)
-    print("force eum", f0)
-    print("config", body.get_configuration())
-
-    del body
-    # Pendulum
-    print("\n===Link 1===")
-    b_pen_1 = Body("lk1")
-    p2 = BodyCoordinate("G2/O", l, 0, 0)
-    j2 = Joint(p0, p2, [DOF(4,)])
-
-    # Add force to cart. Force is applied at the COM
-    T1 = BodyTorque(1, y_dir=True)
-    torque_loc = BodyCoordinate("PT1", -l, 0, 0)
-    b_pen_1.add_torque(T1, torque_loc)
-
-    cnx_pen_1 = Connection(b_gnd, j2, b_pen_1)
-
-    # body.add_connection(cnx_pen_1)
-    body = MultiBody([cnx_pen_1,])
-
-    print("coordinates", body.coordinates)
-    print("bodies", body.bodies)
-    print("forces")
-    for p, f, _ in body.forces:
-        print("Pos", p)
-        print("Dir", f)
-    print("torques")
-    for _, t, _ in body.torques:
-        print(t)
-
-    print("kinetic_energy", body.kinetic_energy)
-    print("potential_energy", body.potential_energy)
-    print("Symbols", body.symbols())
-    LHS, RHS = body.eoms()
-    print("LHS EOM", LHS)
-    print("RHS EOM", RHS)
-    A, B = body.system_matrices()
-    print("Nonlinear A", A)
-    print("Nonlinear B", B)
-
-    A, B = body.system_matrices(True)
-    print("Linear A", A)
-    print("Linear B", B)
-
-    q0, f0 = body.get_equilibria()
-    print("coordinate eum", q0)
-    print("force eum", f0)
-    print("config", body.get_configuration())
-
-    del body
-    print("\n===Cart Pendulum===")
-    l = 2
-    b_car = Body("c")
-    b_pen = Body("p")
-
-    b_car.dims.assign_values([4, 1, 1])
-    b_pen.dims.assign_values([2 * l, 0, 0])
-
-    p0 = BodyCoordinate("O", 0, 0, 0)
-    p1 = BodyCoordinate("Gc/O", 0, 0, 0)
-    p2 = BodyCoordinate("A/Gc", 0, 0, 0)
-    p3 = BodyCoordinate("Gp/A", l, 0, 0)
-
-    j1 = Joint(p0, p1, [DOF(0,)], name="O")
-    j1 = Joint(p2, p3, [DOF(4,)], name="A")
-
-    cnx_car = Connection(b_gnd, j1, b_car)
-    cnx_pen = Connection(b_car, j2, b_pen)
-
-    body = MultiBody([cnx_car, cnx_pen])
-
-    del body
-    print("\n===Double Pendulum===")
-
-    b_pen_1 = Body("p1")
-    p1 = BodyCoordinate("G2/O", l, 0, 0)
-    j1 = Joint(p0, p1, [DOF(4,)])
-
-    # Add force to cart. Force is applied at the COM
-    T1 = BodyTorque(1, y_dir=True)
-    torque_loc = BodyCoordinate("PT1", -l, 0, 0)
-    b_pen_1.add_torque(T1, torque_loc)
-
-    cnx_pen_1 = Connection(b_gnd, j1, b_pen_1)
-
-    # Pendulum
-    b_pen_2 = Body("p2")
-    p2 = BodyCoordinate("A/G2", l, 0, 0)
-    p3 = BodyCoordinate("G3/A", l, 0, 0)
-    j2 = Joint(p2, p3, [DOF(4,)])
-
-    # Add force to cart. Force is applied at the COM
-    T2 = BodyTorque(2, y_dir=True)
-    torque_loc = BodyCoordinate("PT2", -l, 0, 0)
-    b_pen_2.add_torque(T2, torque_loc)
-
-    cnx_pen_2 = Connection(b_pen_1, j2, b_pen_2)
-
-    body = MultiBody([cnx_pen_1, cnx_pen_2])
-
-    print("coordinates", body.coordinates)
-    print("bodies", body.bodies)
-    print("forces")
-    for p, f, _ in body.forces:
-        print("Pos", p)
-        print("Dir", f)
-    print("torques")
-    for _, t, _ in body.torques:
-        print(t)
-
-    print("kinetic_energy", body.kinetic_energy)
-    print("potential_energy", body.potential_energy)
-    print("Symbols", body.symbols())
-    LHS, RHS = body.eoms()
-    print("LHS EOM", LHS)
-    print("RHS EOM", RHS)
-    A, B = body.system_matrices()
-    print("Nonlinear A", A)
-    print("Nonlinear B", B)
-
-    A, B = body.system_matrices(True)
-    print("Linear A", A)
-    print("Linear B", B)
-
-    q0, f0 = body.get_equilibria()
-    print("coordinate eum", q0)
-    print("force eum", f0)
-    print("config", body.get_configuration())
-
-
-@pytest.mark.dev
-def test_MultiBody_output(cart, pendulum, hovercraft, cart_pendulum, double_pendulum):
     cart.as_latex()
     pendulum.as_latex()
     hovercraft.as_latex()
     cart_pendulum.as_latex()
     double_pendulum.as_latex()
+
+
+@pytest.mark.skip
+def test_MultiBody_draw(
+    cart, pendulum, hovercraft, cart_pendulum, double_pendulum,
+):
+    cart.draw()
+    pendulum.draw()
+    hovercraft.draw()
+    cart_pendulum.draw()
+    double_pendulum.draw()
+
+
+@pytest.mark.dev
+def test_MultiBody_bad_types():
+    from skydy.connectors import DOF, Connection, Joint
+    from skydy.multibody import MultiBody
+    from skydy.rigidbody import (
+        Body,
+        BodyCoordinate,
+        BodyForce,
+        BodyTorque,
+        Ground,
+        GroundCoordinate,
+    )
+
+    # Test that fact we cannot have duplicate names for MultiBody objects
+    # Empty list
+    mb = MultiBody([], "duplicate")
+
+    with pytest.raises(ValueError):
+        mb_bad = MultiBody([], "duplicate")
+
+    # Test that a Body if floating in space.
+    # We will have a body connected to ground,
+    # and then two other bodies added to the multibody
+    p0 = GroundCoordinate()
+    p1 = BodyCoordinate("p1", 0, 0, 0)
+
+    b0 = Ground()
+    b1 = Body()
+    j1 = Joint(p0, p1, [])
+
+    b2 = Body()
+    b3 = Body()
+    j2 = Joint(p1, p1, [])
+
+    cnx_1 = Connection(b0, j1, b1)
+    cnx_2 = Connection(b2, j2, b3)
+
+    with pytest.raises(ValueError):
+        m = MultiBody([cnx_1, cnx_2])
+
+    # The first connection must be to the ground
+    with pytest.raises(TypeError):
+        m = MultiBody([cnx_2])
+
+    # incorrect type in the connectiosn list
+    with pytest.raises(TypeError):
+        m = MultiBody([cnx_1, "not a connection"])
+
+    # Duplicate values
+    with pytest.raises(ValueError):
+        m = MultiBody([cnx_1, cnx_2, cnx_2])

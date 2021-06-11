@@ -38,7 +38,10 @@ class BaseSymbols:
         return {s: v.item() for s, v in zip(self.__symbols, self.__values)}
 
     def assign_values(self, values, idx=-1):
-        if hasattr(values, "__len__"):
+
+        if isinstance(values, str):
+            raise TypeError("Values must be an integer, float or boolean.")
+        elif hasattr(values, "__len__"):
             if len(values) == len(self.__values):
                 self.__values = np.array(values).reshape(-1, 1)
             else:

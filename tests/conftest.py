@@ -88,7 +88,7 @@ def pendulum():
     p_gnd = GroundCoordinate()
 
     # Location of pen wrt ground
-    p_pen = BodyCoordinate("G1/O", 0, 0, 0)
+    p_pen = BodyCoordinate("G1/O", l_pen / 2, 0, 0)
 
     # Degrees of freedom
     pen_dofs = [DOF(4)]
@@ -188,9 +188,9 @@ def double_pendulum():
 
     # Define the geometry
     p_gnd = GroundCoordinate()
-    p_p1_O = BodyCoordinate("G1/O", 0, 0, 0)
+    p_p1_O = BodyCoordinate("G1/O", l_pen / 2, 0, 0)
     p_A_p1 = BodyCoordinate("A/Gp1", l_pen / 2, 0, 0)
-    p_p2_A = BodyCoordinate("Gp2/A", -l_pen / 2, 0, 0)
+    p_p2_A = BodyCoordinate("Gp2/A", l_pen / 2, 0, 0)
 
     # Degrees of freedom
     p1_dofs = [DOF(4)]

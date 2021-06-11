@@ -4,21 +4,19 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
-from mpl_toolkits.mplot3d import proj3d
 
 from ..connectors import Connection
-from ..output import Arrow3D, LatexDocument
+from ..output import Arrow3D, LatexDocument, get_output_dir
 from ..rigidbody import Ground
 
 # from sympy.physics.vector.printing import vlatex
-DIR_NAME = "./out"
 
 
 class MultiBody:
     id_counter = 0
     id_names = []
 
-    def __init__(self, connections, name=None):
+    def __init__(self, connections=None, name=None):
         # Body accounting
         MultiBody.id_counter += 1
 
@@ -37,15 +35,19 @@ class MultiBody:
         self.velocities = []
         self.accelerations = []
 
-        g = Ground()
-        self.bodies = {g.name: g}
+        if self.connections:
+            g = Ground()
+            self.bodies = {g.name: g}
+        else:
+            self.bodies = {}
+
         self.joints = {}
         self.forces = []
         self.torques = []
 
         self.kinetic_energy = 0
         self.potential_energy = 0
-        self.G = 0
+        self.G = None
 
         self.eom = None
         self.gen_forces = None
@@ -68,20 +70,28 @@ class MultiBody:
 
     @connections.setter
     def connections(self, val):
-        # Ensure first object is ground
-        assert isinstance(val[0].body_in, Ground)
 
-        body_names = []
-
-        for v in val:
-            assert isinstance(v, Connection)
-            if v.body_out.name in body_names:
-                raise ValueError(
-                    "Duplicate body names exist. Ensure bodies are uniquely named."
+        if (val is None) or not val:
+            self._connections = []
+        else:
+            # Ensure first object is ground
+            if not isinstance(val[0].body_in, Ground):
+                raise TypeError(
+                    "The first connection must be have a Ground object as its first body."
                 )
-            body_names.append(v.body_out.name)
 
-        self._connections = val
+            body_names = []
+
+            for v in val:
+                if not isinstance(v, Connection):
+                    raise TypeError("Connections must be a list of Connection objects.")
+                if v.body_out.name in body_names:
+                    raise ValueError(
+                        "Duplicate body names exist. Ensure bodies are uniquely named."
+                    )
+                body_names.append(v.body_out.name)
+
+            self._connections = val
 
     def add_connection(self, connection):
         self.connections.append(connection)
@@ -95,7 +105,9 @@ class MultiBody:
                 # Propagate the global configuration
                 cnx.global_configuration()
             else:
-                raise ValueError("Body is not connected to a grounded object.")
+                raise ValueError(
+                    f"Bodies connected through joint {cnx.joint.name} are not connected to a grounded object."
+                )
 
             self.bodies[cnx.body_out.name] = cnx.body_out
             self.joints[cnx.joint.name] = cnx.joint
@@ -112,8 +124,8 @@ class MultiBody:
         for body in self.bodies.values():
             # Calculate the globl magnitude, direction and location of forces and torques
             for F, P in body.linear_forces:
-                loc_force = sym.simplify(body.pos_body + body.rot_body @ P.symbols())
-                dir_force = sym.simplify(body.rot_body @ F.symbols())
+                loc_force = body.pos_body + body.rot_body @ P.symbols()
+                dir_force = body.rot_body @ F.symbols()
                 self.forces.append((loc_force, dir_force, F.name))
 
             # Calculate the global torques
@@ -130,8 +142,8 @@ class MultiBody:
         KE = sum([b.kinetic_energy() for b in self.bodies.values()])
         PE = sum([b.potential_energy(g) for b in self.bodies.values()])
 
-        self.kinetic_energy = sym.simplify(KE)
-        self.potential_energy = sym.simplify(PE)
+        self.kinetic_energy = KE
+        self.potential_energy = PE
 
     def __ke_metric(self):
         G = sym.Matrix(
@@ -144,7 +156,7 @@ class MultiBody:
             ]
         )
 
-        self.G = sym.simplify(G)
+        self.G = G
 
     def __el_equations(self):
         # Get unforced dynamics
@@ -156,7 +168,7 @@ class MultiBody:
 
             dyn_g[i] = dli
 
-        self.eom = sym.simplify(dyn_g)
+        self.eom = dyn_g
 
         # Add generalised forces
         gen_forces = {coord: 0 for coord in self.coordinates}
@@ -173,14 +185,18 @@ class MultiBody:
 
         self.gen_forces = sym.Matrix([gen_forces[k] for k in self.coordinates])
 
-        # Get the left and right hand side of the equations of motion
-        # The LHS is the KE metric times accelerations
-        self.__lhs = sym.simplify(self.G @ sym.Matrix(self.accelerations))
+        if self.connections:
+            # Get the left and right hand side of the equations of motion
+            # The LHS is the KE metric times accelerations
+            self.__lhs = self.G @ sym.Matrix(self.accelerations)
 
-        # The RHS is the eoms less the LHS, plus the generalised forces
-        self.__rhs = sym.simplify(-(self.eom - self.__lhs) + self.gen_forces)
+            # The RHS is the eoms less the LHS, plus the generalised forces
+            self.__rhs = -(self.eom - self.__lhs) + self.gen_forces
 
     def get_equilibria(self, unforced=True):
+        if not self.connections:
+            return None, None
+
         _LHS, RHS = self.eoms()
         for v in self.velocities:
             RHS = RHS.subs(v, 0)
@@ -189,6 +205,9 @@ class MultiBody:
         if unforced:
             for f in f0:
                 RHS = RHS.subs(f, 0)
+
+        # Ensure 0s are evaluated
+        RHS = sym.simplify(RHS)
 
         # get the force symbols
         coord_eum = sym.solve(RHS, self.coordinates)
@@ -265,7 +284,7 @@ class MultiBody:
 
     def __latex_lagrangian(self):
         # Lagrangian
-        t_plus_v = sym.latex(self.kinetic_energy + self.potential_energy)
+        t_plus_v = sym.latex(sym.simplify(self.kinetic_energy + self.potential_energy))
 
         str_lagrangian = "L = " + t_plus_v
         return latexify(str_lagrangian)
@@ -280,9 +299,9 @@ class MultiBody:
                 "F_{"
                 + str(name)
                 + "} = \\left("
-                + sym.latex(force)
+                + sym.latex(sym.simplify(force))
                 + ", "
-                + sym.latex(loc)
+                + sym.latex(sym.simplify(loc))
                 + "\\right)"
             )
 
@@ -291,9 +310,9 @@ class MultiBody:
                 "\\tau_{"
                 + str(name)
                 + "} = \\left("
-                + sym.latex(torque)
+                + sym.latex(sym.simplify(torque))
                 + ", "
-                + sym.latex(loc)
+                + sym.latex(sym.simplify(loc))
                 + "\\right)"
             )
 
@@ -338,7 +357,7 @@ class MultiBody:
         self, linearized=False, output_dir=None, file_name=None, include_diag=True
     ):
 
-        output_dir = self.__get_output_dir(output_dir)
+        output_dir = get_output_dir(output_dir)
 
         if file_name is None:
             file_name = "out"
@@ -396,32 +415,30 @@ class MultiBody:
         y_lim = ax.get_ylim3d()
         z_lim = ax.get_ylim3d()
 
-        x0 = np.array(x_lim).mean()
-        y0 = np.array(y_lim).mean()
-        z0 = np.array(z_lim).mean()
+        x_min, x_max = min(-2, min(x_lim)), max(2, max(x_lim))
+        y_min, y_max = min(-2, min(y_lim)), max(2, max(y_lim))
+        z_min, z_max = min(-2, min(z_lim)), max(2, max(z_lim))
 
-        max_ax = 0
-        for lim in [x_lim, y_lim, z_lim]:
-            dlim = np.abs(lim[1] - lim[0])
-            max_ax = max(dlim, max_ax)
+        ax.set_xlim3d(x_min, x_max)
+        ax.set_ylim3d(y_min, y_max)
+        ax.set_zlim3d(z_min, z_max)
 
-        ax.set_xlim3d(x0 - mult * max_ax, x0 + mult * max_ax)
-        ax.set_ylim3d(y0 - mult * max_ax, y0 + mult * max_ax)
-        ax.set_zlim3d(z0 - mult * max_ax, z0 + mult * max_ax)
+        # y0 = np.array(y_lim).mean()
+        # z0 = np.array(z_lim).mean()
+
+        # max_ax = 0
+        # for lim in [x_lim, y_lim, z_lim]:
+        #     dlim = np.abs(lim[1] - lim[0])
+        #     max_ax = max(dlim, max_ax)
+
+        # ax.set_xlim3d(x0 - mult * max_ax, x0 + mult * max_ax)
+        # ax.set_ylim3d(y0 - mult * max_ax, y0 + mult * max_ax)
+        # ax.set_zlim3d(z0 - mult * max_ax, z0 + mult * max_ax)
 
         return ax
 
-    def __get_output_dir(self, output_dir):
-        if output_dir is None:
-            if not os.path.exists(DIR_NAME):
-                os.mkdir(DIR_NAME)
-
-            output_dir = DIR_NAME
-
-        return output_dir
-
     def draw(self, output_dir=None, save_fig=True):
-        output_dir = self.__get_output_dir(output_dir)
+        output_dir = get_output_dir(output_dir)
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
         ax.set_axis_off()

@@ -1,5 +1,9 @@
 import os
 
+from .get_output_dir import get_output_dir
+
+DIR_NAME = "./tex"
+
 
 class LatexDocument:
     def __init__(self):
@@ -59,6 +63,11 @@ class LatexDocument:
         return latex_doc
 
     def write_tex(self, file_name=None, output_dir=None):
+        if file_name is None:
+            file_name = "out"
+
+        output_dir = get_output_dir(output_dir)
+
         sections = ""
 
         for title, tex in self.__sections.items():

@@ -3,6 +3,7 @@
 
 import numpy as np
 import pytest
+import sympy as sym
 
 
 @pytest.mark.configuration
@@ -28,6 +29,29 @@ def test_BaseSymbols():
 
     print(b.values())
     print(b.as_dict())
+
+    print(b.sym_to_np(b.symbols().subs(b.as_dict())))
+
+
+@pytest.mark.configuration
+def test_BaseSymbols_bad_types():
+    from skydy.configuration import BaseSymbols
+
+    b = BaseSymbols(1, "G", True)
+
+    # Incorrent number of values in list
+    with pytest.raises(ValueError):
+        b.assign_values([1, 2, 3])
+        b.assign_values([1, 2, 3, 4, 5, 6, 7])
+
+    # Out of bounds index
+    with pytest.raises(ValueError):
+        b.assign_values(2, -1)
+        b.assign_values(21, 6)
+
+    # Incorrrect value (must be int, float or bool)
+    with pytest.raises(TypeError):
+        b.assign_values("Bad Type", 0)
 
 
 @pytest.mark.configuration
@@ -123,3 +147,31 @@ def test_Configuration():
     print(c.pos_body)
     print(c.rot_body)
     print(c.as_dict())
+
+
+@pytest.mark.configuration
+def test_Configuration_bad_types():
+    from skydy.configuration import Configuration
+
+    c = Configuration("1")
+
+    # Bad types
+    with pytest.raises(TypeError):
+        c.pos_body = "some_val"
+        c.pos_body = 1
+        c.pos_body = [1, 2, 3]
+        c.pos_body = np.array([1, 2, 3])
+        c.pos_body = sym.Matrix([1, 2])
+        c.pos_body = sym.Matrix([1, 2, 3, 4])
+
+    # Bad types
+    with pytest.raises(TypeError):
+        c.rot_body = "some_val"
+        c.rot_body = 1
+        c.rot_body = [1, 2, 3]
+        c.rot_body = np.array([1, 2, 3])
+        c.rot_body = np.eye(2)
+        c.rot_body = np.eye(4)
+        c.rot_body = sym.ones(2, 2)
+        c.rot_body = sym.ones(4, 4)
+        c.rot_body = sym.ones(3, 1)

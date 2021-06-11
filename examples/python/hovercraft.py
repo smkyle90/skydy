@@ -36,7 +36,6 @@ torque_loc = BodyCoordinate("PT1", 0, 0, 0)
 b_hc.add_torque(T1, torque_loc)
 
 # Geometry
-
 p_gnd = GroundCoordinate()
 p_hc_O = BodyCoordinate("Gc/O", 0, 0, 0)
 

@@ -36,8 +36,8 @@ class Configuration(CoordinateSymbols):
     def apply_constraint(self, idx, const_value=0):
         q = self.positions()
         self.assign_values(const_value, idx)
-        self.pos_body = sym.simplify(self.pos_body.subs(q[idx], const_value))
-        self.rot_body = sym.simplify(self.rot_body.subs(q[idx], const_value))
+        self.pos_body = self.pos_body.subs(q[idx], const_value)
+        self.rot_body = self.rot_body.subs(q[idx], const_value)
         self.free_idx -= set([idx])
 
     def reset_constraints(self):
@@ -72,7 +72,7 @@ class Configuration(CoordinateSymbols):
         ) and val.shape == (3, 1):
             self._pos_body = val
         else:
-            raise TypeError("Position must be a 3 x 1 sym.Matrix.")
+            raise TypeError("Body Position must be a 3 x 1 sym.Matrix.")
 
     @property
     def rot_body(self):
@@ -90,4 +90,4 @@ class Configuration(CoordinateSymbols):
 
             self._rot_body = val
         else:
-            raise TypeError("Position must be a 3 x 3 sym.Matrix.")
+            raise TypeError("Body Rotation must be a 3 x 3 sym.Matrix.")

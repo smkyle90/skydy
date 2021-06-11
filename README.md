@@ -19,7 +19,7 @@ _Contents:_
 
 The purpose of this repository is to provide a way to programmatically define an
 inter-connected mechnical system (IMCS) -- a collection of rigid bodies -- to ultimately determine its:
-- Coorinate system
+- Coordinate system
 - Forward Kinematic Maps
 - Kinetic and Potential Energy
 - Kinetic Energy Metric
@@ -29,20 +29,21 @@ inter-connected mechnical system (IMCS) -- a collection of rigid bodies -- to ul
 
 The idea is to have a fully integrated way to define and describe IMCS, and produce useful content. Note, we refer the user to Geometric Control of Mechanical Systems (Bullo & Lewis) for definitions and descriptons used throughout.
 
-IMCS are typically "simple" to scribble on paper, but even with two bodies, the book-keeping and accounting
-on the rotation matrices alone, makes the accurate modelling task cumbersome and error prone. This repository is here to (help) solve that.
+IMCS are typically "simple" to scribble down on paper, but notoriously "difficult" to model correctly. Even with two bodies, the book-keeping and accounting on the rotation matrices alone, makes the accurate modelling task cumbersome and error prone. This repository is here to (help) solve that.
 
 The goal is to be able to take a schematic drawing from paper, and by methodically using code,
 define the body, or collection of bodies. The output of this effort can be one, or many of the following:
 1. A diagram of the IMCS.
 2. A latex document (and PDF), deriving the equations of motion.
-3. A symbolic representation, that can be used a starting point for simulating.
+3. A symbolic representation, that can be used a starting point for running simulations.
 
 This repository relies on the principle that any system is simply a collection of independent bodies connected, via joints, in different configurations. **All definitions and descriptions are done in a Body's coordinate frame.** As such, the mainstays of this repository are the following classes:
-- Body: a Body is simply a collection of particles. It has a mass, and some dimensions (length, width and height).
-- Joint: a Joint is something that provides, or constraints degrees of freedom (DOFs), and ultimately dictates the coordinates (or variables) a Body will have.
-- Connection: a connection involves two bodies (and input and output), and a joint. By definition, the joint is assumed to be fixed at a user prescribed location in the input Body coordinate frame. Also, the output body is attached at a user presribed location in its coordinate frame.
-- BodyCoordindate: for Body, defines an (x,y,z) triple in the body coordinate frame, the location of which can be made global once we connect bodies to one another, and ultimate give our system a Ground reference point. More on that later.
+- `Body`: a collection of particles. It has a mass, and some dimensions (length, width and height).
+- `Joint`: a common location for two bodies. It is a description of a location of where they meet, and how the bodies move relative to each other. It is something that allows motion in certain directions (degrees of freedom), or enforces constraints. A `Joint` ultimately dictates the spatial coordinates (or variables) each body will have in the ICMS.
+- `Connection`: defined by an input and output `Body`, and a `Joint`. By definition, the location of the joint is defined in both the input body and output body's coordinate frames, and as the configuration of the output `Body` can be written in terms of the input `Body`. A connection is also where we enforce the constraints of the `Joint`.
+- `BodyCoordindate`: defines an (x,y,z) triple in the respective body coordinate frame, from its centre of mass. As we connect bodies to one another, we start to translate and rotate these coordinates by the position and rotation matrices (`Configuration`)of each `Body`.
+- `MultiBody`: a sequence of `Connections`. If we are diligent with our definitions of coordinates, bodies and joints, defining connections is straightforward.
+- `Ground`: every system needs reference to a global, or fixed coordinate frame. This is defined as the `Ground`. It does not translate. It does not rotate. It is our origin (0, 0, 0). Every `MultiBody` needs one.
 
 ## Installation & Usage
 
@@ -58,11 +59,16 @@ This repository relies on the principle that any system is simply a collection o
         2. `cd skydy`
         3. `make build`
 2. Using pip and PyPi:
-    1. `pip install skydy`
+    1. `pip install skydy`. Dependencies for this include `python3-tk` and `pdflatex`.
 
 ### Usage
 
-We encourage the reader to review the `examples` folder for some basic examples.
+We encourage the reader to review the `examples` folder for some basic examples. There are `python` files as well as interative notebooks to review. The collection of examples are the simplest, yet most common systems that this modelling methodology is completed on and include:
+1. A one-dimensional cart that moves in the x-coordinate.
+2. A one-dimensional pendulum that rotates about an axis.
+3. A cart-pendulum -- a combination of the two systems above.
+4. A hovercraft -- an object that can move in two-dimensions and rotate.
+5. A double pendulum.
 
 For step-by-step development, the user is encouraged to run their code in an interactive notebook. The Docker image associated with this reporsitory has Jupyter installed. To enter an interactive session, simply run `jupyter notebook --allow-root` from the container and copy and paste the address the terminal provides into your browser of choice.
 
@@ -88,18 +94,24 @@ The `scripts` folder must maintain the following, which are indirectly run from 
 | run.sh    | NAME TAG | Application image is run locally |
 | dev.sh    | NAME TAG | Application image is run locally, with screen privilidges for plotting and development purposes |
 
-## Contributing
+## Developing & Contributing
 The guidelines for contributing are laid out here. All members of the team have write access.
 
 ### TODO
 What I want to get done:
-[] Add mass data to a Body for MassMatrix and InertiaMatrix.
+[] Documentation
+[] Decent Documentation
+[] Thorough Documentation
+[] Add mass data to a Body for MassMatrix and InertiaMatrix objects
+[] Kinematically constrained objects
+[] Linear and rotational springs and dampers
 [] Faster Forward Kinemtics
-[] Sympy to Numpy
 [] Rotating forces
-[] Simulations:
-    [] User defined inputs.
-    [] Calculate controls, etc.
+[] Simulations
+[] Systems analysis, including:
+    [] Stability analysis
+    [] Controllability (both Linear and Nonelinear)
+[] Control Design
 
 ### Development Environment
 - Install [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for creating a nice virtual container to run in.

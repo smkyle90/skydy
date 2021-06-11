@@ -53,28 +53,22 @@ class Connection:
                 self.body_out.apply_constraint(dof.idx, dof.const_value)
 
         # Propagate rotations from input body to output body
-        self.body_out.rot_body = sym.simplify(
-            self.body_in.rot_body @ self.body_out.rot_body
-        )
+        self.body_out.rot_body = self.body_in.rot_body @ self.body_out.rot_body
 
         # Get absolute positions
         # Global coordinate of COM of input link
         p_in = self.body_in.pos_body
 
         # Rotated position of joint on input link
-        p_j_in = sym.simplify(
-            self.body_in.rot_body @ self.joint.body_in_coord.symbols()
-        )
+        p_j_in = self.body_in.rot_body @ self.joint.body_in_coord.symbols()
 
         # Global position of COM of output link to joint
-        p_out_j = sym.simplify(
-            self.body_out.rot_body @ self.joint.body_out_coord.symbols()
-        )
+        p_out_j = self.body_out.rot_body @ self.joint.body_out_coord.symbols()
 
         # Additional DOFs from joint, in the input links coordinate Frame.
-        add_dof = sym.simplify(self.body_in.rot_body @ self.body_out.pos_body)
+        add_dof = self.body_in.rot_body @ self.body_out.pos_body
 
-        self.body_out.pos_body = sym.simplify(p_in + p_j_in + p_out_j + add_dof)
+        self.body_out.pos_body = p_in + p_j_in + p_out_j + add_dof
 
     def draw(self, ax=None, sub_vals={}):
 

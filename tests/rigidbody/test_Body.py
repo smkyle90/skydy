@@ -1,10 +1,8 @@
 """Test the example function
 """
 
-import matplotlib.pyplot as plt
 import pytest
 import sympy as sym
-from mpl_toolkits import mplot3d
 
 
 @pytest.mark.rigidbody
@@ -32,7 +30,6 @@ def test_Body():
 
     # Get body linear and angular velocities
     v, w = b2.body_twists()
-    # # b2.body_velocity(point_on_body)
 
     b2.kinetic_energy()
 
@@ -62,13 +59,12 @@ def test_Body():
     print(b2.dims.values())
 
 
-# @pytest.mark.dev
+@pytest.mark.rigidbody
 def test_Body_draw():
     from skydy.rigidbody import Body
 
     body = Body()
     ax = body.draw()
-    plt.show()
     body.apply_constraint(0)
     body.apply_constraint(1)
     body.apply_constraint(2)
@@ -76,7 +72,8 @@ def test_Body_draw():
     body.apply_constraint(5)
 
     ax = body.draw()
-    plt.show()
+    ax = body.draw(ref_body=None)
+    ax = body.draw(ref_joint=None)
 
 
 @pytest.mark.rigidbody

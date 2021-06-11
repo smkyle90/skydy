@@ -37,8 +37,12 @@ workspace/*
 /dist/*
 tex/*
 .ipynb*
-examples/out*
-out*
+examples/python/out*
+examples/notebooks/out*
+out/*
+
+
+
 
 # Do not ignore
 !requirements.txt

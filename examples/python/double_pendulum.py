@@ -33,7 +33,7 @@ b_p2.add_torque(T2, torque_loc)
 p_gnd = GroundCoordinate()
 p_p1_O = BodyCoordinate("G1/O", 0, 0, 0)
 p_A_p1 = BodyCoordinate("A/Gp1", l_pen / 2, 0, 0)
-p_p2_A = BodyCoordinate("Gp2/A", -l_pen / 2, 0, 0)
+p_p2_A = BodyCoordinate("Gp2/A", l_pen / 2, 0, 0)
 
 # Degrees of freedom
 p1_dofs = [DOF(4)]
