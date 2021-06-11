@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import numpy as np
-import sympy as sym
 
 from ..rigidbody import Body
 from .Joint import Joint

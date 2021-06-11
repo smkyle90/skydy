@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-import copy
-
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sym
@@ -181,7 +179,7 @@ class Body(Configuration):
 
         for i in [-1, 1]:
             rot_body_axes = pos_ref + i * (2 / 3) * rot_ref @ body_dims
-            for idx, axes in enumerate(rot_body_axes.T):
+            for axes in rot_body_axes.T:
                 ax = self.__draw_3d_line(
                     ax, pos_ref, axes, color="k", linewidth=0.25, linestyle="--"
                 )
@@ -266,7 +264,7 @@ class Body(Configuration):
             np.meshgrid(
                 [-l.item() / 2, l.item() / 2],
                 [-w.item() / 2, w.item() / 2],
-                [-w.item() / 2, w.item() / 2],
+                [-h.item() / 2, h.item() / 2],
             )
         ).T.reshape(-1, 3)
 
@@ -335,6 +333,7 @@ def symbols_to_latex(symbols, prefix=None):
             symbols.T.tolist()[0], mode="inline"
         )
     except Exception as e:
+        print(e)
         lat_str = sym.physics.vector.printing.vlatex(symbols, mode="inline")
 
     if prefix is None:

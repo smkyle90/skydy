@@ -1,8 +1,6 @@
 #!/usr/bin/python3
-import os
 
 import matplotlib.pyplot as plt
-import numpy as np
 import sympy as sym
 
 from ..connectors import Connection
