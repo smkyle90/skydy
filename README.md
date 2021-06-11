@@ -99,19 +99,19 @@ The guidelines for contributing are laid out here. All members of the team have 
 
 ### TODO
 What I want to get done:
-- [] Documentation
-- [] Decent Documentation
-- [] Thorough Documentation
-- [] Add mass data to a Body for MassMatrix and InertiaMatrix objects
-- [] Kinematically constrained objects
-- [] Linear and rotational springs and dampers
-- [] Faster Forward Kinemtics
-- [] Rotating forces
-- [] Simulations
-- [] Systems analysis, including:
-    - [] Stability analysis
-    - [] Controllability (both Linear and Nonelinear)
-- [] Control Design
+- [ ] Documentation
+- [ ] Decent Documentation
+- [ ] Thorough Documentation
+- [ ] Add mass data to a Body for MassMatrix and InertiaMatrix objects
+- [ ] Kinematically constrained objects
+- [ ] Linear and rotational springs and dampers
+- [ ] Faster Forward Kinemtics
+- [ ] Rotating forces
+- [ ] Simulations
+- [ ] Systems analysis, including:
+    - [ ] Stability analysis
+    - [ ] Controllability (both Linear and Nonelinear)
+- [ ] Control Design
 
 ### Development Environment
 - Install [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for creating a nice virtual container to run in.
