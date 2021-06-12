@@ -81,7 +81,11 @@ class Connection:
         joint_loc = self.joint.body_in_coord.sym_to_np(joint_loc)
 
         ax.text(
-            *(joint_loc + 0.01 * np.ones(joint_loc.shape)).reshape(-1,).tolist(),
+            *(joint_loc + 0.01 * np.ones(joint_loc.shape))
+            .reshape(
+                -1,
+            )
+            .tolist(),
             self.joint.name,
             c="r",
             fontsize="x-small",

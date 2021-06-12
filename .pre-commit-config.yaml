@@ -8,6 +8,8 @@ repos:
         name: Trailing Whitespace
     -   id: end-of-file-fixer
         name: End of File Fixer
+    -   id: requirements-txt-fixer
+        name: Requirements Fixer
 
 # -   repo: https://github.com/PyCQA/bandit
 #     rev: 1.6.2
@@ -16,24 +18,24 @@ repos:
 #         name: Bandit
 
 -   repo: https://github.com/timothycrosley/isort
-    rev: 5.1.4
+    rev: 5.8.0
     hooks:
     -   id: isort
 
 -   repo: https://github.com/psf/black
-    rev: 19.10b0
+    rev: 21.6b0
     hooks:
     -   id: black
         name: Black
 
 -   repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 3.9.2
     hooks:
     -   id: flake8
         name: Flake8
 
 -   repo: https://github.com/PyCQA/pylint
-    rev: pylint-2.5.3
+    rev: pylint-2.7.4
     hooks:
     -   id: pylint
         name: Pylint

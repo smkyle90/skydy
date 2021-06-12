@@ -18,7 +18,13 @@ def test_Arrow3D():
         (0, 3),
         (0, 4),
     ]
-    arrow = Arrow3D(*basis, mutation_scale=5, lw=1, arrowstyle="-|>", color="r",)
+    arrow = Arrow3D(
+        *basis,
+        mutation_scale=5,
+        lw=1,
+        arrowstyle="-|>",
+        color="r",
+    )
     ax.add_artist(arrow)
 
     plt.show()

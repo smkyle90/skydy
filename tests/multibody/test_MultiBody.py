@@ -40,7 +40,11 @@ def print_result(body):
 
 @pytest.mark.multibody
 def test_MultiBody(
-    cart, pendulum, hovercraft, cart_pendulum, double_pendulum,
+    cart,
+    pendulum,
+    hovercraft,
+    cart_pendulum,
+    double_pendulum,
 ):
     from skydy.multibody import MultiBody
 
@@ -65,7 +69,11 @@ def test_MultiBody(
 
 @pytest.mark.skip
 def test_MultiBody_draw(
-    cart, pendulum, hovercraft, cart_pendulum, double_pendulum,
+    cart,
+    pendulum,
+    hovercraft,
+    cart_pendulum,
+    double_pendulum,
 ):
     cart.draw()
     pendulum.draw()

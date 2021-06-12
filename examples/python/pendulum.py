@@ -42,4 +42,9 @@ j1 = Joint(p_gnd, p_pen, pen_dofs, name=p_gnd.name)
 cnx_pen = Connection(b_gnd, j1, b_pen)
 
 # The multibody object
-oned_pen = MultiBody([cnx_pen,], "pen")
+oned_pen = MultiBody(
+    [
+        cnx_pen,
+    ],
+    "pen",
+)

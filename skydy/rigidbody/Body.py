@@ -175,7 +175,11 @@ class Body(Configuration):
     def __plot_principal_axes(self, ax, pos_ref, rot_ref):
 
         # Plot the principal axes
-        body_dims = np.diag(self.dims.values().reshape(-1,))
+        body_dims = np.diag(
+            self.dims.values().reshape(
+                -1,
+            )
+        )
 
         for i in [-1, 1]:
             rot_body_axes = pos_ref + i * (2 / 3) * rot_ref @ body_dims
@@ -196,7 +200,9 @@ class Body(Configuration):
             rot_ax = ref_joint + half_rot_mat @ base_vector
 
             ax.text(
-                *rot_ax.reshape(-1,).tolist(),
+                *rot_ax.reshape(
+                    -1,
+                ).tolist(),
                 symbols_to_latex(self.positions()[idx + 3]),
                 c="m",
                 fontsize="x-small",
@@ -237,7 +243,7 @@ class Body(Configuration):
                 *v_dim.mean(axis=1), symbols_to_latex(symbol), c="g", fontsize="x-small"
             )
 
-        # Fill in the rest of the body
+        # Fill in the rest of the body (start_vertex, end_vertex)
         rest_of_body = [
             (1, 3),
             (1, 5),
@@ -289,11 +295,17 @@ class Body(Configuration):
 
         # Plot the arrow and add the label
         arrow = Arrow3D(
-            *v_vec.tolist(), mutation_scale=5, lw=1, arrowstyle="-|>", color=color,
+            *v_vec.tolist(),
+            mutation_scale=5,
+            lw=1,
+            arrowstyle="-|>",
+            color=color,
         )
         ax.add_artist(arrow)
         ax.text(
-            *v_end.reshape(-1,),
+            *v_end.reshape(
+                -1,
+            ),
             f"${name_prefix}_{input_obj.name}$",
             c=color,
             fontsize="x-small",
@@ -302,8 +314,7 @@ class Body(Configuration):
         return ax
 
     def __draw_3d_line(self, ax, p1, p2, color="k", linewidth=1, linestyle="-"):
-        """Draw a 3d line from p1 to p2
-        """
+        """Draw a 3d line from p1 to p2"""
         p1 = np.array(p1).reshape(-1, 1)
         p2 = np.array(p2).reshape(-1, 1)
 

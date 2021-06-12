@@ -18,7 +18,7 @@ RUN pip install --upgrade pip
 
 # Copy and install third party dependencies
 # packages, thus the two COPY / RUN statement pairs should speed up rebuilds
-COPY .requirements.txt requirements.txt
+COPY ./requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 # Copy the current directory contents into the container at /skydy

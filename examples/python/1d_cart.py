@@ -82,7 +82,16 @@ car_dofs = [DOF(0)]
 # the first body coordinate is the location of the joint in the first
 # body's frame, and the second body coordinate is in the second body's frame.
 # Name this joint whatever makes sense. Seeing it's the ground, name it that.
-j1 = Joint(p_gnd, p_car, [DOF(0,)], name=p_gnd.name)
+j1 = Joint(
+    p_gnd,
+    p_car,
+    [
+        DOF(
+            0,
+        )
+    ],
+    name=p_gnd.name,
+)
 
 # We are now ready to connect the two bodies through the joint.
 # A Connection is what will allow us to perform our forward kinematics,
@@ -92,7 +101,11 @@ cnx_car = Connection(b_gnd, j1, b_car)
 
 # Create the MultiBody system - a rigid body is just a collection of connected Bodies.
 # It is required that the first connection is to the ground.
-oned_car = MultiBody([cnx_car,])
+oned_car = MultiBody(
+    [
+        cnx_car,
+    ]
+)
 
 # Draw the system
 oned_car.draw()

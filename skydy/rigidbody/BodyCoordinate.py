@@ -1,6 +1,4 @@
 #!/usr/bin/python3
-import numpy as np
-import sympy as sym
 
 from ..configuration import DimensionSymbols
 

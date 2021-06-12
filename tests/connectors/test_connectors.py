@@ -35,7 +35,15 @@ def test_Joint():
     # Simple joint that moves in x-direction
     p0 = BodyCoordinate("O")
     p1 = BodyCoordinate("G/O", 0, 0, 0)
-    j1 = Joint(p0, p1, [DOF(0,)])
+    j1 = Joint(
+        p0,
+        p1,
+        [
+            DOF(
+                0,
+            )
+        ],
+    )
 
     print(j1.body_in_coord)
     print(j1.body_out_coord)
@@ -120,7 +128,15 @@ def test_Connection():
     print("==Rotation==")
     p1 = BodyCoordinate("G2/O", 2, 0, 0)
 
-    j2 = Joint(p0, p1, [DOF(4,)])
+    j2 = Joint(
+        p0,
+        p1,
+        [
+            DOF(
+                4,
+            )
+        ],
+    )
 
     b2 = Body()
 

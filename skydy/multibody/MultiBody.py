@@ -401,7 +401,11 @@ class MultiBody:
 
             basis = [(0, i) for i in vec]
             arrow = Arrow3D(
-                *basis, mutation_scale=5, lw=1, arrowstyle="-|>", color="r",
+                *basis,
+                mutation_scale=5,
+                lw=1,
+                arrowstyle="-|>",
+                color="r",
             )
             ax.add_artist(arrow)
 

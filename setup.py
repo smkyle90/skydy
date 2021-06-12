@@ -23,7 +23,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/smkyle90/skydy",
-    project_urls={"Bug Tracker": "https://github.com/smkyle90/skydy/issues",},
+    project_urls={
+        "Bug Tracker": "https://github.com/smkyle90/skydy/issues",
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
