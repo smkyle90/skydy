@@ -14,6 +14,12 @@ def test_DOF():
     assert d.free
     assert d.const_value == 0
 
+    d = DOF(1, True, 10)
+
+    assert d.idx == 1
+    assert d.free
+    assert d.const_value == 0
+
     d = DOF(1, False)
 
     assert d.idx == 1
