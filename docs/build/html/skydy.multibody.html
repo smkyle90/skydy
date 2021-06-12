@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>skydy.multibody package &#8212; SkyDy 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+
+
+          <div class="body" role="main">
+
+  <section id="skydy-multibody-package">
+<h1>skydy.multibody package<a class="headerlink" href="#skydy-multibody-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-skydy.multibody.MultiBody">
+<span id="skydy-multibody-multibody-module"></span><h2>skydy.multibody.MultiBody module<a class="headerlink" href="#module-skydy.multibody.MultiBody" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">skydy.multibody.MultiBody.</span></span><span class="sig-name descname"><span class="pre">MultiBody</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>A MultiBody is a sequence of Connections. If we are diligent with our
+definitions of coordinates, bodies and joints, the creation of MultiBody
+object is straightforward.</p>
+<p>The most important Connection is the first one, as this is the connection
+that relates our MultiBody object to the Ground. All other Connections
+are then related to Body’s that are defined in upstream, or earlier
+connections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connections</strong> (<em>list</em><em>(</em><em>Connections</em><em>)</em>) – a list of Connection objects. The first Connection in this list must reference the Ground.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> or </em><em>int</em>) – the name of the MultiBody. Note, we do not allow duplicate MultiBody names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Define a MultiBody with one connections.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.rigidbody</span> <span class="kn">import</span> <span class="n">Body</span><span class="p">,</span> <span class="n">BodyCoordinate</span><span class="p">,</span> <span class="n">BodyForce</span><span class="p">,</span> <span class="n">BodyTorque</span><span class="p">,</span> <span class="n">Ground</span><span class="p">,</span> <span class="n">GroundCoordinate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.connectors</span> <span class="kn">import</span> <span class="n">Connectors</span><span class="p">,</span> <span class="n">DOF</span><span class="p">,</span> <span class="n">Joint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s define a MultiBody (car) that moves in the x-direction only</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Provide some dimensions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l_car</span><span class="p">,</span> <span class="n">w_car</span><span class="p">,</span> <span class="n">h_car</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car_name</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the body</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b_car</span> <span class="o">=</span> <span class="n">Body</span><span class="p">(</span><span class="n">car_name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instantiate the car&#39;s dimensions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b_car</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">assign_values</span><span class="p">([</span><span class="n">l_car</span><span class="p">,</span> <span class="n">w_car</span><span class="p">,</span> <span class="n">h_car</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Add force to car in the car&#39;s x-coordinaate.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">F1</span> <span class="o">=</span> <span class="n">BodyForce</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">x_dir</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Force is applied at the COM</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">force_loc</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="s2">&quot;PF1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Add the force at the location</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b_car</span><span class="o">.</span><span class="n">add_force</span><span class="p">(</span><span class="n">F1</span><span class="p">,</span> <span class="n">force_loc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instantiate the ground</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b_gnd</span> <span class="o">=</span> <span class="n">Ground</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p_gnd</span> <span class="o">=</span> <span class="n">GroundCoordinate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Location of car wrt ground</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p_car</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="s2">&quot;G1/O&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Degrees of freedom</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car_dofs</span> <span class="o">=</span> <span class="p">[</span><span class="n">DOF</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Ground to car joint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">j1</span> <span class="o">=</span> <span class="n">Joint</span><span class="p">(</span><span class="n">p_gnd</span><span class="p">,</span> <span class="n">p_car</span><span class="p">,</span> <span class="n">car_dofs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">p_gnd</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The connection of the bodies through the joint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cnx_car</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">b_gnd</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">b_car</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The multibody object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oned_car</span> <span class="o">=</span> <span class="n">MultiBody</span><span class="p">([</span><span class="n">cnx_car</span><span class="p">],</span> <span class="s2">&quot;car&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.add_connection">
+<span class="sig-name descname"><span class="pre">add_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.add_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.add_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a connection to the MultiBody</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>connection</strong> (<a class="reference internal" href="skydy.connectors.html#skydy.connectors.Connection.Connection" title="skydy.connectors.Connection.Connection"><em>Connection</em></a>) – a connection we want to to add.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.as_latex">
+<span class="sig-name descname"><span class="pre">as_latex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linearized</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.as_latex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.as_latex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the latex and pdf document deriving the equations of motion of the
+MultiBody object. Uses the skydy.output.LatexDocument object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>linearized</strong> (<em>bool</em>) – display the linear or nonlinear system matrices</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em><em> or </em><em>None</em>) – location to generate the .tex and .pdf outputs.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em><em> or </em><em>None</em>) – name for the .tex and .pdf files.</p></li>
+<li><p><strong>include_diag</strong> (<em>bool</em>) – include the matplotlib generated diagram of the mutlibody.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.connections">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">connections</span></span><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.connections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.draw">
+<span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.draw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the MultiBody object. Uses the Body and Connection draw
+methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_dir</strong> (<em>str</em><em> or </em><em>None</em>) – location to generate the .tex and .pdf outputs.</p></li>
+<li><p><strong>save_fig</strong> (<em>bool</em>) – save or simply render the drawing.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.eoms">
+<span class="sig-name descname"><span class="pre">eoms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.eoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.eoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the LHS and RHS of the equations of motion,</p>
+<p>The LHS is the Riemannian Metric times the accelerations.
+The RHS is the Generalised Forces minus the potential functions,
+less any other dissipative forces.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.force_symbols">
+<span class="sig-name descname"><span class="pre">force_symbols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.force_symbols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.force_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the force symbols. We have to remove the coordinates and time symbols.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.get_configuration">
+<span class="sig-name descname"><span class="pre">get_configuration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.get_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.get_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the configuration, coordinates, dimensions of the bodies
+in the MultiBody object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.get_equilibria">
+<span class="sig-name descname"><span class="pre">get_equilibria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unforced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.get_equilibria"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.get_equilibria" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the equilibria configurations for the MultiBody.</p>
+<p>Equilibria exist at configurations when the velocities and
+accelerations are zero. They can be forced or unforced.</p>
+<dl class="simple">
+<dt>For a system with EOMs of the form:</dt><dd><p>x’’ = f(x, x’, u)</p>
+</dd>
+<dt>The unforced equlibria are the x0 such that</dt><dd><p>f(x0, 0, 0) = 0.</p>
+</dd>
+<dt>The forced equilibria, x0, u0, satisfy</dt><dd><p>f(x0, 0, u0) = 0.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unforced</strong> (<em>bool</em>) – returns the forced or unforced equilbria</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the coordinate equilibria values.
+force_eum (sympy.matrix): the force equilibria values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>coord_eum (sympy.matrix)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.id_counter">
+<span class="sig-name descname"><span class="pre">id_counter</span></span><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.id_counter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.id_names">
+<span class="sig-name descname"><span class="pre">id_names</span></span><em class="property"> <span class="pre">=</span> <span class="pre">[]</span></em><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.id_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.symbols">
+<span class="sig-name descname"><span class="pre">symbols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.symbols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the free symbols for the equations of motion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.MultiBody.system_matrices">
+<span class="sig-name descname"><span class="pre">system_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linearized</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#MultiBody.system_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.MultiBody.system_matrices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the linear or non-linear system matrices.</p>
+<p>Assume the MultiBody state x = (q, dq), where q are the
+generalised coordintae, and dq the associated velocities.</p>
+<p>Then the system is described by:</p>
+<blockquote>
+<div><p>M * x’ = f(x, u),</p>
+</div></blockquote>
+<p>where M is a block matrix with diagonal entries of the Identity
+and the Riemannian metric, i.e., M = blockdiag(I, G)</p>
+<p>The linear system matrices are then defined by:</p>
+<blockquote>
+<div><p>M * x’ = A * x + B * u</p>
+</div></blockquote>
+<p>where A = d/dx(f(x, u)), and B = d/du(f(x, u)).</p>
+<p>To avoid overly complex expressions, we keep the M matrix on the LHS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>linearized</strong> (<em>bool</em>) – Return the linearized (or linear state-space) representation of the system, or nonlinear.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the linear or nonlinear state transitions matrix.
+B (sympy.matrix)) the linear input matrix. If linearized=False, this is just the appropriately sized zero matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A (sympy.matrix)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skydy.multibody.MultiBody.latexify">
+<span class="sig-prename descclassname"><span class="pre">skydy.multibody.MultiBody.</span></span><span class="sig-name descname"><span class="pre">latexify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/multibody/MultiBody.html#latexify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.multibody.MultiBody.latexify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursive function to turn a string, or sympy.latex to a
+latex equation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string_item</strong> (<em>str</em>) – string we want to make into an equation</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a latex-able equation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>equation_item (str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-skydy.multibody">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-skydy.multibody" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">SkyDy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Scott M. Kyle.
+
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+
+      |
+      <a href="_sources/skydy.multibody.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+
+
+
+  </body>
+</html>

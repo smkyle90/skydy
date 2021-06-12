@@ -225,9 +225,7 @@ class Body(Configuration):
             ax (matplotlib.axes._subplots.AxesSubplot): the axis to plot the connection on.
             ref_body (None or Body): the reference Body to propagate dimensions, coordinates etc.
             ref_joint (None or numpy.ndarray): the location of the joint the body is connected to.
-            sub_vals (dict): symbol-value pairs required to go from symbolic to numeric expression.
-            It is important to note, that all symbols each body is dependent on, for example, for upstream
-            bodies and joints, are included.
+            sub_vals (dict): symbol-value pairs required to go from symbolic to numeric expression. It is important to note, that all symbols each body is dependent on, for example, for upstream bodies and joints, are included.
 
         Returns:
             ax (matplotlib.axes._subplots.AxesSubplot): updated axes, with plots.

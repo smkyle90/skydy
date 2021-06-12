@@ -13,8 +13,7 @@ class DOF:
         Args:
             idx (int): the free coordinate index, between 0 and 5.
             free (bool): if the coordinte at index idx is free. True by default.
-            const_value (int or float): If the DOF is not free, i.e., free=False on instantiation,
-            we assign the constant value the coordinate has. By defualt this is zero.
+            const_value (int or float): If the DOF is not free, i.e., free=False on instantiation, we assign the constant value the coordinate has. By defualt this is zero.
 
         Returns:
             None

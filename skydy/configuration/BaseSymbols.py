@@ -17,13 +17,9 @@ class BaseSymbols:
         inherit from this class. s such, we never explicility use this class
 
         Args:
-            name (int or str): the name for the symbols. This will form the superscript,
-            i.e., the body the symbols refer to.
-            identifier (int or str): gives meaning to the symbol set as it identifies
-            what or where the symbol set refer to. For a set of coordinates, this is "G",
-            the centre of mass. For a force, torque or length it is F, tau and l respectively.
-            is_coords (int or str): defines if a sextuple is defines (representing the
-            6 coordinates) of a body, or a triple (representing the three Cartesian coordinates).
+            name (int or str): the name for the symbols. This will form the superscript, i.e., the body the symbols refer to.
+            identifier (int or str): gives meaning to the symbol set as it identifies what or where the symbol set refer to. For a set of coordinates, this is "G", the centre of mass. For a force, torque or length it is F, tau and l respectively.
+            is_coords (int or str): defines if a sextuple is defines (representing the 6 coordinates) of a body, or a triple (representing the three Cartesian coordinates).
 
         Example:
             A coordinate representation of body named "1", at its centre of mass, G.
@@ -84,11 +80,8 @@ class BaseSymbols:
         """Assign value(s) to a symbol. By defualt, the value is instantiated as 1.
 
         Args:
-            values (array-like object, int or float): the value(s) we want to assign.
-            This must be an array-like object of the len(self.__symbols), or an integer.
-            If an integer is provided, a valid index must be provided.
-            idx (int): for an int or float, the index to assign the value to.
-            This must be a valid index in 0 to len(self.__symbols)-1.
+            values (array-like object, int or float): the values we want to assign. This must be an array-like object of the len(self.__symbols), or an integer. If an integer is provided, a valid index must be provided.
+            idx (int): for an int or float, the index to assign the value to. This must be a valid index in 0 to len(self.__symbols)-1.
 
         Returns:
             None
@@ -134,8 +127,7 @@ class BaseSymbols:
         can and cannot convert.
 
         Args:
-            sym_matrix (sympy.matrices.dense.MutableDenseMatrix): a sympy matrix, with
-            values substituted in.
+            sym_matrix (sympy.matrices.dense.MutableDenseMatrix): a sympy matrix, with values substituted in.
 
         Returns:
             np_matrix (numpy.ndarray): a numpy matrix of same dimensions of the input matrix.
@@ -168,8 +160,7 @@ class CoordinateSymbols(BaseSymbols):
         Fix your x-axis appropriately, and the rest comes for free.
 
         Args:
-            name (int, float or string): the name of the body or object we want to
-            generate coordinates for.
+            name (int, float or string): the name of the body or object we want to generate coordinates for.
 
         Returns:
             None
@@ -200,8 +191,7 @@ class DimensionSymbols(BaseSymbols):
         defined by l, or a length.
 
         Args:
-            name (int, float or string): the name of the body or object we want to
-            generate dimensions for.
+            name (int, float or string): the name of the body or object we want to generate dimensions for.
 
         Returns:
             None
@@ -224,8 +214,7 @@ class ForceSymbols(BaseSymbols):
         by F, or a Force.
 
         Args:
-            name (int, float or string): the name of the body or object we want to
-            designate a force for.
+            name (int, float or string): the name of the body or object we want to designate a force for.
 
         Returns:
             None
@@ -248,8 +237,7 @@ class TorqueSymbols(BaseSymbols):
         these symbols are defined by tau, or a Torque.
 
         Args:
-            name (int, float or string): the name of the body or object we want to
-            designate a Torque for.
+            name (int, float or string): the name of the body or object we want to designate a Torque for.
 
         Returns:
             None

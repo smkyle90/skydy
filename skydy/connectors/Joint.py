@@ -13,7 +13,8 @@ class Joint:
         dof=[DOF(0), DOF(1), DOF(2), DOF(3), DOF(4), DOF(5)],
         name=None,
     ):
-        """A Joint a common location for two bodies to interact, and how the bodies can
+        """
+        A Joint a common location for two bodies to interact, and how the bodies can
         move relative to each other, based on the DOFs or constraints a joint has.
 
         A Joint needs to be defined in the inputs AND output body's coordinate frames.

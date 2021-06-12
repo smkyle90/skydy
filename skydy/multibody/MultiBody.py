@@ -25,10 +25,8 @@ class MultiBody:
         connections.
 
         Args:
-            connections (list(Connections)): a list of Connection objects. The first Connection in this
-            list must reference the Ground.
-            name (str or int): the name of the MultiBody. Note, we do not allow duplicate
-            MultiBody names.
+            connections (list(Connections)): a list of Connection objects. The first Connection in this list must reference the Ground.
+            name (str or int): the name of the MultiBody. Note, we do not allow duplicate MultiBody names.
 
         Returns:
             None
@@ -362,13 +360,11 @@ class MultiBody:
         To avoid overly complex expressions, we keep the M matrix on the LHS.
 
         Args:
-            linearized (bool): Return the linearized (or linear state-space)
-            representation of the system, or nonlinear.
+            linearized (bool): Return the linearized (or linear state-space) representation of the system, or nonlinear.
 
         Returns:
             A (sympy.matrix): the linear or nonlinear state transitions matrix.
-            B (sympy.matrix)) the linear input matrix. If linearized=False, this is just
-            the appropriately sized zero matrix.
+            B (sympy.matrix)) the linear input matrix. If linearized=False, this is just the appropriately sized zero matrix.
 
         """
         f = self.force_symbols()

@@ -44,3 +44,4 @@ out/*
 !.placeholder
 
 !examples/notebooks/*.ipynb
+!docs/*

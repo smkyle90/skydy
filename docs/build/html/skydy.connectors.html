@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>skydy.connectors package &#8212; SkyDy 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+
+
+          <div class="body" role="main">
+
+  <section id="skydy-connectors-package">
+<h1>skydy.connectors package<a class="headerlink" href="#skydy-connectors-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-skydy.connectors.Connection">
+<span id="skydy-connectors-connection-module"></span><h2>skydy.connectors.Connection module<a class="headerlink" href="#module-skydy.connectors.Connection" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">skydy.connectors.Connection.</span></span><span class="sig-name descname"><span class="pre">Connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Connection.html#Connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Connection.Connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Connection.html#Connection.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Connection.Connection.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the connection fo two bodies, through a joint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>body_in</strong> (<a class="reference internal" href="skydy.rigidbody.html#skydy.rigidbody.Body.Body" title="skydy.rigidbody.Body.Body"><em>Body</em></a>) – the input body</p></li>
+<li><p><strong>joint</strong> (<a class="reference internal" href="#skydy.connectors.Joint.Joint" title="skydy.connectors.Joint.Joint"><em>Joint</em></a>) – the joint, defined as a common location for the input and output bodies, and the associated DOFs. Note, it is critical here, that the joint’s input coordinate is in body_in coordinate frame, and the output coordinate is in body_out coordinate frame.</p></li>
+<li><p><strong>body_in</strong> – the output body</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.connectors</span> <span class="kn">import</span> <span class="n">DOF</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">Joint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.rigidbody</span> <span class="kn">import</span> <span class="n">Body</span><span class="p">,</span> <span class="n">BodyCoordinate</span><span class="p">,</span> <span class="n">Ground</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Two point-masses that meet at the origin</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="s2">&quot;G/O&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assume the joint can move in the x-coordinate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">j1</span> <span class="o">=</span> <span class="n">Joint</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="p">[</span><span class="n">DOF</span><span class="p">(</span><span class="mi">0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the two bodies</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b1</span> <span class="o">=</span> <span class="n">Body</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b2</span> <span class="o">=</span> <span class="n">Body</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cnx</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">b2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Connection.html#Connection.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Connection.Connection.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary of the coordinate and properties of the connection.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.body_in">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">body_in</span></span><a class="headerlink" href="#skydy.connectors.Connection.Connection.body_in" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.body_out">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">body_out</span></span><a class="headerlink" href="#skydy.connectors.Connection.Connection.body_out" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.draw">
+<span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_vals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Connection.html#Connection.draw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Connection.Connection.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the connection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>matplotlib.axes._subplots.AxesSubplot</em>) – the axis to plot the connection on.</p></li>
+<li><p><strong>sub_vals</strong> (<em>dict</em>) – symbol-value pairs required to go from symbolic to numeric expression. It is important to note, that all symbols each body is dependent on, for example, for upstream bodies and joints, are included.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>updated axes, with plots.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ax (matplotlib.axes._subplots.AxesSubplot)</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.connectors</span> <span class="kn">import</span> <span class="n">DOF</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">Joint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.rigidbody</span> <span class="kn">import</span> <span class="n">Body</span><span class="p">,</span> <span class="n">BodyCoordinate</span><span class="p">,</span> <span class="n">Ground</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Two point-masses that meet at the origin</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="s2">&quot;G/O&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assume the joint can move in the x-coordinate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">j1</span> <span class="o">=</span> <span class="n">Joint</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="p">[</span><span class="n">DOF</span><span class="p">(</span><span class="mi">0</span><span class="p">)],</span> <span class="s2">&quot;J&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the two bodies</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b1</span> <span class="o">=</span> <span class="n">Body</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b2</span> <span class="o">=</span> <span class="n">Body</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cnx</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">b2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the axes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">cnx</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.global_configuration">
+<span class="sig-name descname"><span class="pre">global_configuration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Connection.html#Connection.global_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Connection.Connection.global_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate the configuration from the input body, to the output
+body through the joint.</p>
+<p>Updates the attribute values in place.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.joint">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">joint</span></span><a class="headerlink" href="#skydy.connectors.Connection.Connection.joint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-skydy.connectors.DOF">
+<span id="skydy-connectors-dof-module"></span><h2>skydy.connectors.DOF module<a class="headerlink" href="#module-skydy.connectors.DOF" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="skydy.connectors.DOF.DOF">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">skydy.connectors.DOF.</span></span><span class="sig-name descname"><span class="pre">DOF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/DOF.html#DOF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.DOF.DOF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.connectors.DOF.DOF.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/DOF.html#DOF.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.DOF.DOF.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Degree of Freedom is nothing other than a body coordinate that is able
+to move.</p>
+<p>Thus, to define a DOF, we need to simply supply the free index (idx). By default,
+if it is free, there is no constant value, so we do not need to supply the second,
+or third arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em>) – the free coordinate index, between 0 and 5.</p></li>
+<li><p><strong>free</strong> (<em>bool</em>) – if the coordinte at index idx is free. True by default.</p></li>
+<li><p><strong>const_value</strong> (<em>int</em><em> or </em><em>float</em>) – If the DOF is not free, i.e., free=False on instantiation, we assign the constant value the coordinate has. By defualt this is zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Demonstrate all combinations of the DOF construction.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.connectors</span> <span class="kn">import</span> <span class="n">DOF</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define a DOF in the x-coordinate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_dof</span> <span class="o">=</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note the following ALSO defines a coordinate in the y-direction</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y_dof</span> <span class="o">=</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define a constraint in the z-direction, at a value of 10.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z_con</span> <span class="o">=</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define a constraint in the theta_z-direction, at a value of 2.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta_z_con</span> <span class="o">=</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.DOF.DOF.const_value">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">const_value</span></span><a class="headerlink" href="#skydy.connectors.DOF.DOF.const_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.DOF.DOF.free">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">free</span></span><a class="headerlink" href="#skydy.connectors.DOF.DOF.free" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.DOF.DOF.idx">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#skydy.connectors.DOF.DOF.idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-skydy.connectors.Joint">
+<span id="skydy-connectors-joint-module"></span><h2>skydy.connectors.Joint module<a class="headerlink" href="#module-skydy.connectors.Joint" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="skydy.connectors.Joint.Joint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">skydy.connectors.Joint.</span></span><span class="sig-name descname"><span class="pre">Joint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">body_in_coord,</span> <span class="pre">body_out_coord,</span> <span class="pre">dof=[&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;],</span> <span class="pre">name=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Joint.html#Joint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Joint.Joint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skydy.connectors.Joint.Joint.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">body_in_coord,</span> <span class="pre">body_out_coord,</span> <span class="pre">dof=[&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;,</span> <span class="pre">&lt;skydy.connectors.DOF.DOF</span> <span class="pre">object&gt;],</span> <span class="pre">name=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Joint.html#Joint.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Joint.Joint.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Joint a common location for two bodies to interact, and how the bodies can
+move relative to each other, based on the DOFs or constraints a joint has.</p>
+<p>A Joint needs to be defined in the inputs AND output body’s coordinate frames.</p>
+<p>By default, a joint is assumed to be free in all directions. If a user defines
+a free or non-free DOF, we account for it. Any unspecified coordintes indices are
+assumed to be constrained at a value of zero.</p>
+<dl>
+<dt>Diagram:</dt><dd><blockquote>
+<div><p>z2  y2</p>
+</div></blockquote>
+<p>z1  y1                              |  /
+|  /               p_j              | /
+| /       ____—-&gt;x&lt;—-_____      <a href="#id1"><span class="problematic" id="id2">|</span></a>/
+<a href="#id3"><span class="problematic" id="id4">|</span></a>/….—-                    ——O2——-x2
+O1——-x1                         ^G2
+^G1</p>
+</dd>
+</dl>
+<p>Let Body 1 have CoM at O1, Body 2 have CoM at O2, and let a Joint
+exists at the point p_j. The point p_j can be described in both
+Body 1 and Body 2’s coordinate frames. Note, the coordinate frames
+need not be aligned, or pointing in the same direction.</p>
+<p>The body_in_coord, say this is Body 1, is the vector from 01 -&gt; p_j in (x1, y1, z1).
+The body_out_coord, say this is Body 2, is the vector from 02 -&gt; p_j in (x2, y2, z2).</p>
+<p>The degrees of freedom are defined as motion in the input Body’s
+coordinate frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>body_in_coord</strong> (<a class="reference internal" href="skydy.rigidbody.html#skydy.rigidbody.BodyCoordinate.BodyCoordinate" title="skydy.rigidbody.BodyCoordinate.BodyCoordinate"><em>BodyCoordinate</em></a>) – the location of the joint in the input body’s coordinate frame.</p></li>
+<li><p><strong>body_out_coord</strong> (<a class="reference internal" href="skydy.rigidbody.html#skydy.rigidbody.BodyCoordinate.BodyCoordinate" title="skydy.rigidbody.BodyCoordinate.BodyCoordinate"><em>BodyCoordinate</em></a>) – the location of the joint in the output body’s coordinate frame.</p></li>
+<li><p><strong>dof</strong> (<em>list</em><em>(</em><a class="reference internal" href="#skydy.connectors.DOF.DOF" title="skydy.connectors.DOF.DOF"><em>DOF</em></a><em>)</em>) – the list of DOFs for the joint. By default, all coordinates are free.</p></li>
+<li><p><strong>name</strong> (<em>int</em><em> or </em><em>str</em>) – the name of the joint.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.connectors</span> <span class="kn">import</span> <span class="n">DOF</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skydy.rigidbody</span> <span class="kn">import</span> <span class="n">BodyCoordinate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the location of the joint in the input coordinate frame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p_1</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the location of the joint in the output coordinate frame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p_2</span> <span class="o">=</span> <span class="n">BodyCoordinate</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the DOFs for our joint. Say x-direction and</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># theta_y directions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">j_dofs</span> <span class="o">=</span> <span class="p">[</span><span class="n">DOF</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define the joint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">joint</span> <span class="o">=</span> <span class="n">Joint</span><span class="p">(</span><span class="n">p_1</span><span class="p">,</span> <span class="n">p_2</span><span class="p">,</span> <span class="n">j_dofs</span><span class="p">,</span> <span class="s2">&quot;J&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check which DOFs are free. Expect 0 and 4.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">dof</span> <span class="ow">in</span> <span class="n">joint</span><span class="o">.</span><span class="n">dof</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">if</span> <span class="n">dof</span><span class="o">.</span><span class="n">free</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="nb">print</span><span class="p">(</span><span class="n">dof</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.Joint.Joint.body_in_coord">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">body_in_coord</span></span><a class="headerlink" href="#skydy.connectors.Joint.Joint.body_in_coord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.Joint.Joint.body_out_coord">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">body_out_coord</span></span><a class="headerlink" href="#skydy.connectors.Joint.Joint.body_out_coord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skydy.connectors.Joint.Joint.dof">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#skydy.connectors.Joint.Joint.dof" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skydy.connectors.Joint.Joint.id_counter">
+<span class="sig-name descname"><span class="pre">id_counter</span></span><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#skydy.connectors.Joint.Joint.id_counter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-skydy.connectors">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-skydy.connectors" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">SkyDy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Scott M. Kyle.
+
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+
+      |
+      <a href="_sources/skydy.connectors.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+
+
+
+  </body>
+</html>

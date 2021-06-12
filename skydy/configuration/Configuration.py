@@ -22,8 +22,7 @@ class Configuration(CoordinateSymbols):
         body's name, and the 6 CoordinateSymbols that describe it.
 
         Args:
-            name (int or str): the name for the symbols. This will form the superscript,
-            i.e., the body the symbols refer to.
+            name (int or str): the name for the symbols. This will form the superscript, i.e., the body the symbols refer to.
 
         Returns:
             None
@@ -76,8 +75,7 @@ class Configuration(CoordinateSymbols):
 
         Args:
             idx (int): the index to apply the constriaint to.
-            const_value (int or float): the constant value to substitute in for the
-            coordinate at the index. Default value is zero.
+            const_value (int or float): the constant value to substitute in for the coordinate at the index. Default value is zero.
 
         Returns:
             None
@@ -118,11 +116,10 @@ class Configuration(CoordinateSymbols):
             symbols (sympy.matrices.dense.MutableDenseMatrix or list): a list of symbols.
 
         Returns:
-            free_symbols (list): a list of free symbols from the input list, based on
-            the free configuration indices.
+            free_symbols (list): a list of free symbols from the input list, based on the free configuration indices.
 
         Example:
-            See free_coordinates, free_velocities, free_accelerations below.
+            See self.free_coordinates(), self.free_velocities(), self.free_accelerations() below.
         """
         return [symbols[idx] for idx in self.free_idx]
 

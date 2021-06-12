@@ -12,10 +12,7 @@ class Connection:
 
         Args:
             body_in (Body): the input body
-            joint (Joint): the joint, defined as a common location for the input and
-            output bodies, and the associated DOFs. Note, it is critical here, that
-            the joint's input coordinate is in body_in coordinate frame, and the output
-            coordinate is in body_out coordinate frame.
+            joint (Joint): the joint, defined as a common location for the input and output bodies, and the associated DOFs. Note, it is critical here, that the joint's input coordinate is in body_in coordinate frame, and the output coordinate is in body_out coordinate frame.
             body_in (Body): the output body
 
         Returns:
@@ -110,9 +107,7 @@ class Connection:
 
         Args:
             ax (matplotlib.axes._subplots.AxesSubplot): the axis to plot the connection on.
-            sub_vals (dict): symbol-value pairs required to go from symbolic to numeric expression.
-            It is important to note, that all symbols each body is dependent on, for example, for upstream
-            bodies and joints, are included.
+            sub_vals (dict): symbol-value pairs required to go from symbolic to numeric expression. It is important to note, that all symbols each body is dependent on, for example, for upstream bodies and joints, are included.
 
         Returns:
             ax (matplotlib.axes._subplots.AxesSubplot): updated axes, with plots.
