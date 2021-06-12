@@ -1,8 +1,0 @@
-# Name the app
-APP_NAME: "Your App Name"
-
-# Logging
-LOGGING:
-  VERBOSITY: "DEBUG"
-
-# Add your configuration parameters here...
