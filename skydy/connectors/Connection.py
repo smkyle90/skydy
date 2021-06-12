@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import matplotlib.pyplot as plt
 import numpy as np
 
 from ..rigidbody import Body
@@ -24,7 +25,6 @@ class Connection:
 
             >>> from skydy.connectors import DOF, Connection, Joint
             >>> from skydy.rigidbody import Body, BodyCoordinate, Ground
-
             >>> # Two point-masses that meet at the origin
             >>> p0 = BodyCoordinate("O")
             >>> p1 = BodyCoordinate("G/O", 0, 0, 0)
@@ -105,7 +105,7 @@ class Connection:
 
         self.body_out.pos_body = p_in + p_j_in + p_out_j + add_dof
 
-    def draw(self, ax, sub_vals={}):
+    def draw(self, ax=None, sub_vals={}):
         """Draw the connection
 
         Args:
@@ -139,6 +139,11 @@ class Connection:
             >>> plt.show()
 
         """
+
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection="3d")
+
         sub_vals = {
             **sub_vals,
             **self.as_dict(),

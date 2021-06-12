@@ -45,7 +45,7 @@ class Joint:
         Args:
             body_in_coord (BodyCoordinate): the location of the joint in the input body's coordinate frame.
             body_out_coord (BodyCoordinate): the location of the joint in the output body's coordinate frame.
-            dof (list(DOF)): The list of DOFs for the joint. By default, all coordinates are free.
+            dof (list(DOF)): the list of DOFs for the joint. By default, all coordinates are free.
             name (int or str): the name of the joint.
 
         Returns:

@@ -166,3 +166,5 @@ def test_Connection():
     print(cnx.body_out.rot_body)
 
     print(cnx.joint)
+
+    cnx.draw()
