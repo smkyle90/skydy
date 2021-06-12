@@ -10,7 +10,7 @@ import sympy as sym
 def test_BaseSymbols():
     from skydy.configuration import BaseSymbols
 
-    b = BaseSymbols("1", "G", coordinates=True)
+    b = BaseSymbols("1", "G", is_coords=True)
 
     print(b.symbols())
     print(b.values())
@@ -23,7 +23,7 @@ def test_BaseSymbols():
     print(b.values())
     print(b.as_dict())
 
-    b = BaseSymbols("2", "T", coordinates=False)
+    b = BaseSymbols("2", "T", is_coords=False)
     print(b.symbols())
     b.assign_values([2, 4, 6])
 
@@ -128,7 +128,6 @@ def test_Configuration():
 
     print(c.pos_body)
     print(c.rot_body)
-    print(c.state_vec())
 
     c.apply_constraint(1, 0)
     print(c.pos_body)

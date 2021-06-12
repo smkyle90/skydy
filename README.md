@@ -18,7 +18,7 @@ _Contents:_
 ## Background
 
 The purpose of this repository is to provide a way to programmatically define an
-inter-connected mechnical system (IMCS) -- a collection of rigid bodies -- to ultimately determine its:
+inter-connected mechnical system (ICMS) -- a collection of rigid bodies -- to ultimately determine its:
 - coordinate system;
 - forward kinematic maps;
 - kinetic and potential energy;
@@ -27,13 +27,13 @@ inter-connected mechnical system (IMCS) -- a collection of rigid bodies -- to ul
 - equations of motion;
 - forced and unforced equilibria.
 
-The idea is to have a fully integrated way to define and describe IMCS, and produce useful content. Note, we refer the user to Geometric Control of Mechanical Systems (Bullo & Lewis) for definitions and descriptons used throughout.
+The idea is to have a fully integrated way to define and describe ICMS, and produce useful content. Note, we refer the user to [Geometric Control of Mechanical Systems (Bullo & Lewis)](https://link.springer.com/book/10.1007/978-1-4899-7276-7) for definitions and descriptons used throughout.
 
-IMCS are typically "simple" to scribble down on a piece of paper, but notoriously "difficult" to understand how they move (or model correctly). Even with two bodies, the book-keeping and accounting on the rotation matrices alone renders the modelling task cumbersome and error prone. This repository is here to (help) solve that.
+ICMS are typically "simple" to scribble down on a piece of paper, but notoriously "difficult" to understand how they move (or model correctly). Even with two bodies, the book-keeping and accounting on the rotation matrices alone renders the modelling task cumbersome and error prone. This repository is here to (help) solve that.
 
 The goal is to be able to take a schematic drawing from paper, and by methodically using code,
 define the ICMS. The output of this effort can be one, or many of the following:
-1. A diagram of the IMCS.
+1. A diagram of the ICMS.
 2. A latex document (and PDF), deriving equations of motion.
 3. A symbolic representation, that can be used a starting point for running simulations.
 
@@ -110,6 +110,7 @@ What I want to get done:
 - [ ] Kinematically constrained objects
 - [ ] Linear and rotational springs and dampers
 - [ ] Faster Forward Kinemtics
+- [ ] Dig into `sympy.physics.mechanics` and their Lagrangian stuff further
 - [ ] Rotating forces
 - [ ] Simulations
 - [ ] Systems analysis, including:
