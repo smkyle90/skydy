@@ -7,6 +7,7 @@ DIR_NAME = "./tex"
 
 class LatexDocument:
     def __init__(self):
+        """A simple latex document that has sections and figures."""
 
         self.__begin = (
             "\\documentclass[8pt]{article}\n"

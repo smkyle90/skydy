@@ -163,6 +163,10 @@ class CoordinateSymbols(BaseSymbols):
         Coordinate symbols are simply the translational (x,y,z) and rotational
         (theta_x, theta_y, theta_z) coordinates about the centre of mass of a body.
 
+        As expected, use the RIGHT HAND RULE to determine coordinate directions.
+
+        Fix your x-axis appropriately, and the rest comes for free.
+
         Args:
             name (int, float or string): the name of the body or object we want to
             generate coordinates for.

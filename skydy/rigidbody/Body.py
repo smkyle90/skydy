@@ -10,8 +10,6 @@ from ..output import Arrow3D
 from .BodyCoordinate import BodyCoordinate
 from .BodyForce import BodyForce, BodyTorque
 
-# from .BodyCoordinate import BodyCoordinate
-
 GROUND_NAME = "0"
 
 
@@ -19,6 +17,31 @@ class Body(Configuration):
     id_counter = 1
 
     def __init__(self, name=None):
+        """A Body is a collection of particles. It has a mass, and some dimensions
+        (length, width and height), and by default has six degrees of freedom (DOFs).
+        As such, it extends the Configuration class, with the addition of the inertial
+        properties (InertiaMatrix and MassMatrix) and some dimensions (DimensionSymbols).
+
+        We also instantite two empty lists for the forces and torques that *might* be
+        applied to the body.
+
+        Args:
+            name (int, float or string): the name of the body.
+
+        Returns:
+            None
+
+        Example:
+
+            >>> from skydy.rigidbody import Body
+            >>> # Empty initializer
+            >>> b_1 = Body()
+            >>> # Define name by a number
+            >>> b_2 = Body(2)
+            >>> # Empty initializer
+            >>> b_3 = Body("car")
+
+        """
 
         # Body accounting
         self.body_id = Body.id_counter
@@ -42,6 +65,33 @@ class Body(Configuration):
         self.dims = DimensionSymbols(self.name)
 
     def body_twists(self):
+        """Calculate the body twists to ultimately determine the
+        translational and rotational velocities.
+
+
+        omega is the body rotational velocity.
+        v_body is the body translational velocity.
+
+        Mathematical expressions are:
+
+        Let r \\in R^3 be the position of the COM, and R \\in SO(3) the body orientation.
+
+        Then,
+
+            omega_hat = R^(-1) @ (d/dt) R,
+            omega = unhat_map(omega_hat),
+            v_body = (d/dt) r.
+
+        Refer to Bullo and Lewis for more information.
+
+        Args:
+            None
+
+        Returns:
+            v_body (sympy.matrix): the body translational velocities
+            omega_body (sympy.matrix): the body rotational velocities
+
+        """
         # Get the rotational velocity
         omega = self.rot_body.inv() @ sym.diff(self.rot_body, sym.Symbol("t"))
 
@@ -53,6 +103,23 @@ class Body(Configuration):
         return sym.simplify(v_body), sym.simplify(omega_body)
 
     def kinetic_energy(self):
+        """Determine the kinetic energy of the body.
+
+        Let v_body \\in R^3, w_body \\in R^3 be the translational and rotational velocities,
+        M \\in R^(3x3), I \\in R^(3x3) be the mass and inertia matrices, then,
+
+            KE_trans = (1/2) * v_vody^(T) @ M @ v_body
+            KE_rot = (1/2) * w_vody^(T) @ I @ w_body
+
+            KE_tot = KE_trans + KE_rot.
+
+        Args:
+            None
+
+        Returns:
+            KE_tot (sympy.symbol): the symbol expression of the kinetic energy.
+
+        """
         # Define the kinetic energy of the system
         v_body, w_body = self.body_twists()
         KE_tr = (1 / 2) * v_body.T @ self.mass_matrix.as_mat() @ v_body
@@ -60,10 +127,55 @@ class Body(Configuration):
         return sym.simplify(KE_tr[0] + KE_ro[0])
 
     def potential_energy(self, gravity):
+        """Determine the potential energy of the body.
+
+        The PE is the component of the position of the body in the z-coordinate (height), times
+        gravity (g), times mass, i.e.,
+
+            PE = m * dot(g, r)
+
+        Args:
+            gravity (sympy.matrix): the gravity vector in the global coordinte frame, typically [0, 0, g]
+
+        Returns:
+            potential_energy (sympy.symbols): the symbol expression of the potential energy
+
+        Examples:
+
+            >>> from skydy.rigidbody import Body
+            >>> b = Body()
+            >>> # Define the gravity vector
+            >>> g = sym.Matrix([0, 0, sym.Symbol('g')])
+            >>> # Calculate the potential energy
+            >>> b.potential_energy(g)
+
+        """
         g = sym.Symbol("g")
         return self.mass_matrix.as_mat()[0, 0] * g * self.pos_body.dot(gravity)
 
     def add_force(self, force_vector, force_location):
+        """Add, or apply a force to the body. For a force to
+        do anything, the force must have a direction AND a location.
+
+        Args:
+            force_vector (BodyForce): the force direction, as defined in the body's coordinate frame.
+            force_location (BodyCoordinate): the location of the force, as define in the body's coordinate frame.
+
+        Returns:
+            None
+
+        Examples:
+
+            >>> from skydy.Body import Body, BodyForce, BodyCoordinate
+            >>> # Define the body
+            >>> b = Body()
+            >>> # Apply a force in the x-direction
+            >>> f_1 = BodyForce("1", x_dir=True)
+            >>> # Apply the force at the origin of the Body
+            >>> f_loc = BodyCoordinate("PF1")
+            >>> # We can now apply the force
+            >>> b.apply_force(f_1, f_loc)
+        """
         assert isinstance(
             force_vector, BodyForce
         ), "Force Vector Must be a BodyForce object."
@@ -74,6 +186,29 @@ class Body(Configuration):
         self.linear_forces.append(linear_force)
 
     def add_torque(self, torque_vector, torque_location):
+        """Add, or apply a torque to the body. For a torque to f
+        do anything, the torque must have a direction AND a location.
+
+        Args:
+            torque_vector (BodyTorque): the torque direction, as defined in the body's coordinate frame.
+            torque_location (BodyCoordinate): the location of the torque, as define in the body's coordinate frame.
+
+        Returns:
+            None
+
+        Examples:
+
+            >>> from skydy.Body import Body, BodyTorque, BodyCoordinate
+            >>> # Define the body
+            >>> b = Body()
+            >>> # Apply a torque in the x-direction
+            >>> t_1 = BodyTorque("1", x_dir=True)
+            >>> # Apply the torque at the origin of the Body
+            >>> t_loc = BodyCoordinate("PT1")
+            >>> # We can now apply the torque
+            >>> b.apply_torque(t_1, t_loc)
+
+        """
         assert isinstance(
             torque_vector, BodyTorque
         ), "Torque Vector Must be a BodyTorque object."
@@ -84,6 +219,31 @@ class Body(Configuration):
         self.linear_torques.append(linear_torque)
 
     def draw(self, ax=None, ref_body=None, ref_joint=None, sub_vals={}):
+        """Draw the body.
+
+        Args:
+            ax (matplotlib.axes._subplots.AxesSubplot): the axis to plot the connection on.
+            ref_body (None or Body): the reference Body to propagate dimensions, coordinates etc.
+            ref_joint (None or numpy.ndarray): the location of the joint the body is connected to.
+            sub_vals (dict): symbol-value pairs required to go from symbolic to numeric expression.
+            It is important to note, that all symbols each body is dependent on, for example, for upstream
+            bodies and joints, are included.
+
+        Returns:
+            ax (matplotlib.axes._subplots.AxesSubplot): updated axes, with plots.
+
+        Example:
+            >>> import matplotlib.pyplot as plt
+            >>> from skydy.rigidbody import Body
+            >>> # Define the body
+            >>> b = Body()
+            >>> # Define the axes
+            >>> fig = plt.figure()
+            >>> ax = fig.add_subplot(111, projection='3d')
+            >>> ax = b.draw(ax)
+            >>> plt.show()
+
+        """
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
@@ -123,7 +283,7 @@ class Body(Configuration):
         half_rot_mat = self.sym_to_np(half_rot_mat)
 
         # Plot principal axes and the free rotation angles
-        ax = self.__plot_principal_axes(ax, body_pos_mat, body_rot_mat)
+        ax = self.__plot_body_axes(ax, body_pos_mat, body_rot_mat)
         ax = self.__plot_free_angles(ax, ref_joint, half_rot_mat)
 
         # Dimension plotting
@@ -144,6 +304,7 @@ class Body(Configuration):
         return ax
 
     def __plot_COM(self, ax, pos_ref, ref_origin, ref_body):
+        """Plot the COM of the body."""
         # Plot the COM
         ax.scatter3D(pos_ref[0, 0], pos_ref[1, 0], pos_ref[2, 0], c="k", s=2)
         ax.text(
@@ -172,8 +333,8 @@ class Body(Configuration):
 
         return ax
 
-    def __plot_principal_axes(self, ax, pos_ref, rot_ref):
-
+    def __plot_body_axes(self, ax, pos_ref, rot_ref):
+        """Plot the body axes."""
         # Plot the principal axes
         body_dims = np.diag(
             self.dims.values().reshape(
@@ -191,6 +352,7 @@ class Body(Configuration):
         return ax
 
     def __plot_free_angles(self, ax, ref_joint, half_rot_mat):
+        """Plot the free angles."""
         for idx in range(3):
             if (idx + 3) not in self.free_idx:
                 continue
@@ -211,6 +373,7 @@ class Body(Configuration):
         return ax
 
     def __plot_body_geometry(self, ax, pos_ref, rot_ref):
+        """Plot the body geometry."""
         body_corners = self.__get_body_corners()
 
         # Move translate and rotate corners into global frame
@@ -263,6 +426,7 @@ class Body(Configuration):
         return ax
 
     def __get_body_corners(self):
+        """Get the location of the corners based on the body geometry."""
         # Get body dimensions
         l, w, h = self.dims.values()
         # get all the combinations of body_corners as a np array
@@ -279,6 +443,7 @@ class Body(Configuration):
     def __plot_input(
         self, ax, input_obj, input_loc, pos_ref, rot_ref, color, name_prefix
     ):
+        """Plot an input in the direction of the input, at the location of the input."""
         input_val = input_obj.values()
         loc_val = input_loc.values()
 
@@ -314,7 +479,7 @@ class Body(Configuration):
         return ax
 
     def __draw_3d_line(self, ax, p1, p2, color="k", linewidth=1, linestyle="-"):
-        """Draw a 3d line from p1 to p2"""
+        """Draw a line from p1 to p2."""
         p1 = np.array(p1).reshape(-1, 1)
         p2 = np.array(p2).reshape(-1, 1)
 
@@ -328,6 +493,22 @@ class Body(Configuration):
 
 class Ground(Body):
     def __init__(self):
+        """The base Body for every system.
+
+        The Ground defines the global coordinate frame, that cannot move or rotate.
+        All coordinates are constrained, with zero constant value.
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Example:
+
+            >>> from skydy.rigidbody import Ground
+            >>> b_gnd = Ground()
+        """
         super().__init__(GROUND_NAME)
 
         self.pos_body = sym.zeros(3, 1)
@@ -339,6 +520,16 @@ class Ground(Body):
 
 
 def symbols_to_latex(symbols, prefix=None):
+    """Convert symbols to latex.
+
+    Args:
+        symbols (sympy.matrix or sympy.Symbol): a list of symbols or symbol.
+        prefix (str): an "equals" prefix.
+
+    Returns:
+        latex_str (str): sympy object turned into a latex-able string.
+
+    """
     try:
         lat_str = sym.physics.vector.printing.vlatex(
             symbols.T.tolist()[0], mode="inline"
