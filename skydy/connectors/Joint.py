@@ -22,6 +22,26 @@ class Joint:
         a free or non-free DOF, we account for it. Any unspecified coordintes indices are
         assumed to be constrained at a value of zero.
 
+        Diagram:
+                                                z2  y2
+            z1  y1                              |  /
+            |  /               p_j              | /
+            | /       ____---->x<----_____      |/
+            |/....----                    ------O2-------x2
+            O1-------x1                         ^G2
+            ^G1
+
+        Let Body 1 have CoM at O1, Body 2 have CoM at O2, and let a Joint
+        exists at the point p_j. The point p_j can be described in both
+        Body 1 and Body 2's coordinate frames. Note, the coordinate frames
+        need not be aligned, or pointing in the same direction.
+
+        The body_in_coord, say this is Body 1, is the vector from 01 -> p_j in (x1, y1, z1).
+        The body_out_coord, say this is Body 2, is the vector from 02 -> p_j in (x2, y2, z2).
+
+        The degrees of freedom are defined as motion in the input Body's
+        coordinate frame.
+
         Args:
             body_in_coord (BodyCoordinate): the location of the joint in the input body's coordinate frame.
             body_out_coord (BodyCoordinate): the location of the joint in the output body's coordinate frame.
