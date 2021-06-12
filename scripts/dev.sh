@@ -1,4 +1,4 @@
-CONTAINER_NAME=pydy
+CONTAINER_NAME=skydy
 
 xhost +local:
 

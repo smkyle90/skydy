@@ -1,1 +1,1 @@
-docker build -t pydy .
+docker build -t skydy .

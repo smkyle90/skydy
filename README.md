@@ -116,6 +116,8 @@ What I want to get done:
     - [ ] Stability analysis
     - [ ] Controllability (both Linear and Nonelinear)
 - [ ] Control Design
+- [ ] Decrease the size of the Docker image
+- [ ] Add an image to Docker hub
 
 ### Development Environment
 - Install [Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) for creating a nice virtual container to run in.
