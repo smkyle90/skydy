@@ -417,10 +417,8 @@ class MultiBody:
         # with open('./configs/result.yml', 'w') as yaml_file:
         #     yaml.dump(config_dict, yaml_file, default_flow_style=False)
 
-        """Latex helper
-        """
-
     def __latex_fk_maps(self):
+        """Latex helper"""
         fk_maps = [
             "\\Pi_{"
             + body.name
