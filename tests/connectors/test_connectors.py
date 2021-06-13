@@ -41,15 +41,14 @@ def test_Joint():
     # Simple joint that moves in x-direction
     p0 = BodyCoordinate("O")
     p1 = BodyCoordinate("G/O", 0, 0, 0)
-    j1 = Joint(
-        p0,
-        p1,
-        [
-            DOF(
-                0,
-            )
-        ],
-    )
+
+    # Empty initialiser
+    j1 = Joint(p0, p1)
+
+    for dof in j1.dof:
+        assert dof.free
+
+    j1 = Joint(p0, p1, [DOF(0)])
 
     print(j1.body_in_coord)
     print(j1.body_out_coord)
@@ -57,6 +56,13 @@ def test_Joint():
 
     for dof in j1.dof:
         if dof.idx == 0:
+            assert dof.free
+        else:
+            assert not dof.free
+
+    j1 = Joint(p0, p1, [DOF(0), DOF(4)])
+    for dof in j1.dof:
+        if (dof.idx == 0) or (dof.idx == 4):
             assert dof.free
         else:
             assert not dof.free

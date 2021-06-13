@@ -17,8 +17,10 @@ _Contents:_
 
 ## Background
 
+Welcome to SkyDy—a *Dy*namics package for Python built by me, *S*cott *Ky*le.
+
 The purpose of this repository is to provide a way to programmatically define an
-inter-connected mechnical system (ICMS) -- a collection of rigid bodies -- to ultimately determine its:
+inter-connected mechnical system (ICMS)—a collection of rigid bodies—to ultimately determine its:
 - coordinate system;
 - forward kinematic maps;
 - kinetic and potential energy;
@@ -70,11 +72,15 @@ For this methodology, **all definitions and descriptions are done in a Body's co
 We encourage the reader to review the [`examples`](https://github.com/smkyle90/skydy/tree/main/examples) folder for some basic examples. There are useable `.py` files in the `python` directory, as well as interative notebooks. The collection of examples are the simplest, yet most common, systems this modelling methodology can be used on, and include:
 1. A one-dimensional cart that moves in the x-coordinate.
 2. A one-dimensional pendulum that rotates about an axis.
-3. A cart-pendulum -- a combination of the two systems above.
-4. A hovercraft -- an object that can move in two-dimensions and rotate.
+3. A cart-pendulum—a combination of the two systems above.
+4. A hovercraft—an object that can move in two-dimensions and rotate.
 5. A double pendulum.
 
+
 For step-by-step development, the user is encouraged to run their code in an interactive notebook. This will leverage the power of `Sympy` and the `skydy` process. The Docker image associated with this repository has Jupyter installed. To enter an interactive session, simply run `jupyter notebook --allow-root` from the container and copy and paste the address the terminal provides into your browser of choice.
+
+### Documentation
+Skydy documentation can be found [here](https://skydy.readthedocs.io/en/latest/) on Read The Docs! The docs are aligned with the latest Github release.
 
 ## Running
 
@@ -103,19 +109,20 @@ The guidelines for contributing are laid out here. All members of the team have 
 
 ### TODO
 What I want to get done:
-- [ ] Documentation
+- [x] Documentation (Completed June 13, 2021. Docstrings added and infrastructure for Read The Docs & Sphinx autodocs.)
 - [ ] Decent Documentation
 - [ ] Thorough Documentation
+- [ ] Prettier Latex printing
 - [ ] Add mass data to a Body for MassMatrix and InertiaMatrix objects
 - [ ] Kinematically constrained objects
-- [ ] Linear and rotational springs and dampers
-- [ ] Faster Forward Kinemtics
-- [ ] Dig into `sympy.physics.mechanics` and their Lagrangian stuff further
+- [ ] Translationall and rotational springs and dampers
+- [ ] *Faster* Forward Kinemtics
+- [ ] Dig into `sympy.physics.mechanics` and their Lagrangian capabilties
 - [ ] Rotating forces
 - [ ] Simulations
 - [ ] Systems analysis, including:
     - [ ] Stability analysis
-    - [ ] Controllability (both Linear and Nonelinear)
+    - [ ] Controllability (both Linear and Nonlinear)
 - [ ] Control Design
 - [ ] Decrease the size of the Docker image
 - [ ] Add an image to Docker hub
