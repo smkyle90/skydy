@@ -10,7 +10,7 @@ class Joint:
         self,
         body_in_coord,
         body_out_coord,
-        dof=[DOF(0), DOF(1), DOF(2), DOF(3), DOF(4), DOF(5)],
+        dof=None,
         name=None,
     ):
         """
@@ -46,7 +46,7 @@ class Joint:
         Args:
             body_in_coord (BodyCoordinate): the location of the joint in the input body's coordinate frame.
             body_out_coord (BodyCoordinate): the location of the joint in the output body's coordinate frame.
-            dof (list(DOF)): the list of DOFs for the joint. By default, all coordinates are free.
+            dof (list(DOF), or None): the list of DOFs for the joint. By default, all coordinates are free.
             name (int or str): the name of the joint.
 
         Returns:
@@ -108,14 +108,18 @@ class Joint:
 
     @dof.setter
     def dof(self, val):
-        def_idx = []
+        dof_idx = []
+
+        # Default value means all DOFs are free
+        if val is None:
+            val = [DOF(0), DOF(1), DOF(2), DOF(3), DOF(4), DOF(5)]
 
         for v in val:
             assert isinstance(v, DOF)
-            def_idx.append(v.idx)
+            dof_idx.append(v.idx)
 
         all_idx = set([i for i in range(6)])
-        rem_idx = all_idx - set(def_idx)
+        rem_idx = all_idx - set(dof_idx)
 
         for idx in rem_idx:
             val.append(DOF(idx, False))

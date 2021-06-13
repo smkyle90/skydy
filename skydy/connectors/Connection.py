@@ -84,6 +84,8 @@ class Connection:
             if not dof.free:
                 self.body_out.apply_constraint(dof.idx, dof.const_value)
 
+        # TODO: draw a diagram to accompany this.
+
         # Propagate rotations from input body to output body
         self.body_out.rot_body = self.body_in.rot_body @ self.body_out.rot_body
 
@@ -94,15 +96,16 @@ class Connection:
         # Rotated position of joint on input link
         p_j_in = self.body_in.rot_body @ self.joint.body_in_coord.symbols()
 
-        # Global position of COM of output link to joint
+        # Global position of COM of output link wrt joint
         p_out_j = self.body_out.rot_body @ self.joint.body_out_coord.symbols()
 
         # Additional DOFs from joint, in the input links coordinate Frame.
         add_dof = self.body_in.rot_body @ self.body_out.pos_body
 
+        # The output links position is the sum of these 4 vectors
         self.body_out.pos_body = p_in + p_j_in + p_out_j + add_dof
 
-    def draw(self, ax=None, sub_vals={}):
+    def draw(self, ax=None, sub_vals=None):
         """Draw the connection
 
         Args:
@@ -138,6 +141,9 @@ class Connection:
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection="3d")
+
+        if sub_vals is None:
+            sub_vals = {}
 
         sub_vals = {
             **sub_vals,

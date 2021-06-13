@@ -218,7 +218,7 @@ class Body(Configuration):
         linear_torque = (torque_vector, torque_location)
         self.linear_torques.append(linear_torque)
 
-    def draw(self, ax=None, ref_body=None, ref_joint=None, sub_vals={}):
+    def draw(self, ax=None, ref_body=None, ref_joint=None, sub_vals=None):
         """Draw the body.
 
         Args:
@@ -252,7 +252,7 @@ class Body(Configuration):
         if ref_joint is None:
             ref_joint = np.zeros((3, 1))
 
-        if not sub_vals:
+        if sub_vals is None:
             sub_vals = self.as_dict()
 
         # Make copies of the symbols position, rotation and origins
@@ -331,7 +331,7 @@ class Body(Configuration):
 
         return ax
 
-    def __plot_body_axes(self, ax, pos_ref, rot_ref):
+    def __plot_body_axes(self, ax, pos_ref, rot_ref, scale_by=1):
         """Plot the body axes."""
         # Plot the principal axes
         body_dims = np.diag(
@@ -339,9 +339,9 @@ class Body(Configuration):
                 -1,
             )
         )
-
+        # plot the positive and negative vectors
         for i in [-1, 1]:
-            rot_body_axes = pos_ref + i * (2 / 3) * rot_ref @ body_dims
+            rot_body_axes = pos_ref + i * scale_by * rot_ref @ body_dims
             for axes in rot_body_axes.T:
                 ax = self.__draw_3d_line(
                     ax, pos_ref, axes, color="k", linewidth=0.25, linestyle="--"
@@ -351,12 +351,15 @@ class Body(Configuration):
 
     def __plot_free_angles(self, ax, ref_joint, half_rot_mat):
         """Plot the free angles."""
-        for idx in range(3):
-            if (idx + 3) not in self.free_idx:
+        n_coords = 3
+        for idx in range(n_coords):
+            if (idx + n_coords) not in self.free_idx:
                 continue
-
-            base_vector = np.zeros((3, 1))
-            base_vector[(idx + 2) % 3, 0] = 1
+            # A rotation about x-coordinate is plotted as a rotation of
+            # either the y- or z-axis, etc. As such we need to rotate and plot
+            # the angle about the i-th axis as a vector abot the i+2-th basis vector.
+            base_vector = np.zeros((n_coords, 1))
+            base_vector[(idx + 2) % n_coords, 0] = 1
             rot_ax = ref_joint + half_rot_mat @ base_vector
 
             ax.text(
