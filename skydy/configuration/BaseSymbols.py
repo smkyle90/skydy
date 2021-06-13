@@ -16,6 +16,8 @@ class BaseSymbols:
         Later, we have specific object thats handle these scenarios for us, but all
         inherit from this class. s such, we never explicility use this class
 
+        TEST IF THIS AUTOMATICALLY UPDATES ON A PUSH.
+
         Args:
             name (int or str): the name for the symbols. This will form the superscript, i.e., the body the symbols refer to.
             identifier (int or str): gives meaning to the symbol set as it identifies what or where the symbol set refer to. For a set of coordinates, this is "G", the centre of mass. For a force, torque or length it is F, tau and l respectively.
