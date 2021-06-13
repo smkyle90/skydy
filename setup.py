@@ -24,8 +24,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/smkyle90/skydy",
     project_urls={
-        "Bug Tracker": "https://github.com/smkyle90/skydy/issues",
         "Documentation": "https://skydy.readthedocs.io/",
+        "Bug Tracker": "https://github.com/smkyle90/skydy/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
