@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>skydy.connectors.Joint &#8212; SkyDy 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for skydy.connectors.Joint</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python3</span>
+<span class="kn">from</span> <span class="nn">..rigidbody</span> <span class="kn">import</span> <span class="n">BodyCoordinate</span>
+<span class="kn">from</span> <span class="nn">.DOF</span> <span class="kn">import</span> <span class="n">DOF</span>
+
+
+<div class="viewcode-block" id="Joint"><a class="viewcode-back" href="../../../skydy.connectors.html#skydy.connectors.Joint.Joint">[docs]</a><span class="k">class</span> <span class="nc">Joint</span><span class="p">:</span>
+    <span class="n">id_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Joint.__init__"><a class="viewcode-back" href="../../../skydy.connectors.html#skydy.connectors.Joint.Joint.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body_in_coord</span><span class="p">,</span>
+        <span class="n">body_out_coord</span><span class="p">,</span>
+        <span class="n">dof</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A Joint a common location for two bodies to interact, and how the bodies can</span>
+<span class="sd">        move relative to each other, based on the DOFs or constraints a joint has.</span>
+
+<span class="sd">        A Joint needs to be defined in the inputs AND output body&#39;s coordinate frames.</span>
+
+<span class="sd">        By default, a joint is assumed to be free in all directions. If a user defines</span>
+<span class="sd">        a free or non-free DOF, we account for it. Any unspecified coordintes indices are</span>
+<span class="sd">        assumed to be constrained at a value of zero.</span>
+
+<span class="sd">        Diagram:</span>
+<span class="sd">                                                z2  y2</span>
+<span class="sd">            z1  y1                              |  /</span>
+<span class="sd">            |  /               p_j              | /</span>
+<span class="sd">            | /       ____----&gt;x&lt;----_____      |/</span>
+<span class="sd">            |/....----                    ------O2-------x2</span>
+<span class="sd">            O1-------x1                         ^G2</span>
+<span class="sd">            ^G1</span>
+
+<span class="sd">        Let Body 1 have CoM at O1, Body 2 have CoM at O2, and let a Joint</span>
+<span class="sd">        exists at the point p_j. The point p_j can be described in both</span>
+<span class="sd">        Body 1 and Body 2&#39;s coordinate frames. Note, the coordinate frames</span>
+<span class="sd">        need not be aligned, or pointing in the same direction.</span>
+
+<span class="sd">        The body_in_coord, say this is Body 1, is the vector from 01 -&gt; p_j in (x1, y1, z1).</span>
+<span class="sd">        The body_out_coord, say this is Body 2, is the vector from 02 -&gt; p_j in (x2, y2, z2).</span>
+
+<span class="sd">        The degrees of freedom are defined as motion in the input Body&#39;s</span>
+<span class="sd">        coordinate frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            body_in_coord (BodyCoordinate): the location of the joint in the input body&#39;s coordinate frame.</span>
+<span class="sd">            body_out_coord (BodyCoordinate): the location of the joint in the output body&#39;s coordinate frame.</span>
+<span class="sd">            dof (list(DOF), or None): the list of DOFs for the joint. By default, all coordinates are free.</span>
+<span class="sd">            name (int or str): the name of the joint.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">            &gt;&gt;&gt; from skydy.connectors import DOF</span>
+<span class="sd">            &gt;&gt;&gt; from skydy.rigidbody import BodyCoordinate</span>
+<span class="sd">            &gt;&gt;&gt; # Define the location of the joint in the input coordinate frame</span>
+<span class="sd">            &gt;&gt;&gt; p_1 = BodyCoordinate(1, 10, 4, 5)</span>
+<span class="sd">            &gt;&gt;&gt; # Define the location of the joint in the output coordinate frame</span>
+<span class="sd">            &gt;&gt;&gt; p_2 = BodyCoordinate(2, -5, -3, -2)</span>
+<span class="sd">            &gt;&gt;&gt; # Define the DOFs for our joint. Say x-direction and</span>
+<span class="sd">            &gt;&gt;&gt; # theta_y directions</span>
+<span class="sd">            &gt;&gt;&gt; j_dofs = [DOF(0), DOF(4)]</span>
+<span class="sd">            &gt;&gt;&gt; # Define the joint</span>
+<span class="sd">            &gt;&gt;&gt; joint = Joint(p_1, p_2, j_dofs, &quot;J&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; # Check which DOFs are free. Expect 0 and 4.</span>
+<span class="sd">            &gt;&gt;&gt; for dof in joint.dof:</span>
+<span class="sd">            &gt;&gt;&gt;     if dof.free:</span>
+<span class="sd">            &gt;&gt;&gt;         print(dof.idx)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Body accounting</span>
+        <span class="n">Joint</span><span class="o">.</span><span class="n">id_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_id</span> <span class="o">=</span> <span class="n">Joint</span><span class="o">.</span><span class="n">id_counter</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">joint_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dof</span> <span class="o">=</span> <span class="n">dof</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_in_coord</span> <span class="o">=</span> <span class="n">body_in_coord</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_out_coord</span> <span class="o">=</span> <span class="n">body_out_coord</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">body_in_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_body_in_coord</span>
+
+    <span class="nd">@body_in_coord</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">body_in_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">BodyCoordinate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_body_in_coord</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">body_out_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_body_out_coord</span>
+
+    <span class="nd">@body_out_coord</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">body_out_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">BodyCoordinate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_body_out_coord</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dof</span>
+
+    <span class="nd">@dof</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">dof</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="n">dof_idx</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Default value means all DOFs are free</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="p">[</span><span class="n">DOF</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">DOF</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">DOF</span><span class="p">)</span>
+            <span class="n">dof_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="n">all_idx</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span>
+        <span class="n">rem_idx</span> <span class="o">=</span> <span class="n">all_idx</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dof_idx</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">rem_idx</span><span class="p">:</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DOF</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dof</span> <span class="o">=</span> <span class="n">val</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">SkyDy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../skydy.html">skydy package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Scott M. Kyle.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

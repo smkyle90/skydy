@@ -38,8 +38,6 @@ tex/*
 examples/python/out*
 examples/notebooks/out*
 out/*
-docs/build/*
-docs/source/*
 
 # Do not ignore
 !requirements.txt
@@ -49,5 +47,4 @@ docs/source/*
 !examples/notebooks/*.ipynb
 
 # Index and Configuration for documentation
-!docs/source/index.rst
-!docs/source/conf.py
+!docs/*
