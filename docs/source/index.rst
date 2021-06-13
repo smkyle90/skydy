@@ -6,11 +6,19 @@
 Welcome to SkyDy's documentation!
 =================================
 
+A PDF version of these docs can be found `here <https://github.com/smkyle90/skydy/releases>`_.
+
+`SkyDy <https://github.com/smkyle90/skydy/>`_ is a Python packagel to provide a way to programmatically define an
+inter-connected mechnical system (ICMS). If you are new to SkyDy, start with some `Examples <https://github.com/smkyle90/skydy/tree/main/examples>`_.
+
+This is the central page for all of SkyDy's documentation.
+
+Contents:
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
 
-
+   skydy
 
 Indices and tables
 ==================

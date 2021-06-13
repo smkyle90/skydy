@@ -62,7 +62,7 @@ For this methodology, **all definitions and descriptions are done in a Body's co
         1. `git clone https://github.com/smkyle90/skydy.git`
         2. `cd skydy`
         3. `make build`
-2. Using pip and PyPi (see note):
+2. Using pip and [PyPi](https://pypi.org/project/skydy/) (see note):
     1. `pip install skydy`.
 
 **Note: For `1.1` and `2.1`, OS level dependencies include `python3-tk` and `pdflatex`.**
