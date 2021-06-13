@@ -4,13 +4,16 @@ repos:
     hooks:
     -   id: check-yaml
         name: Check YAML
+        exclude: ^docs/
     -   id: trailing-whitespace
         name: Trailing Whitespace
+        exclude: ^docs/
     -   id: end-of-file-fixer
         name: End of File Fixer
+        exclude: ^docs/
     -   id: requirements-txt-fixer
         name: Requirements Fixer
-
+        exclude: ^docs/
 # -   repo: https://github.com/PyCQA/bandit
 #     rev: 1.6.2
 #     hooks:
@@ -21,22 +24,23 @@ repos:
     rev: 5.8.0
     hooks:
     -   id: isort
-
+        exclude: ^docs/
 -   repo: https://github.com/psf/black
     rev: 21.6b0
     hooks:
     -   id: black
         name: Black
-
+        exclude: ^docs/
 -   repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:
     -   id: flake8
         name: Flake8
-
+        exclude: ^docs/
 -   repo: https://github.com/PyCQA/pylint
     rev: pylint-2.7.4
     hooks:
     -   id: pylint
         name: Pylint
         verbose: true
+        exclude: ^docs/

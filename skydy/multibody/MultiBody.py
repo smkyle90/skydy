@@ -15,6 +15,57 @@ class MultiBody:
     id_names = []
 
     def __init__(self, connections=None, name=None):
+        """A MultiBody is a sequence of Connections. If we are diligent with our
+        definitions of coordinates, bodies and joints, the creation of MultiBody
+        object is straightforward.
+
+        The most important Connection is the first one, as this is the connection
+        that relates our MultiBody object to the Ground. All other Connections
+        are then related to Body's that are defined in upstream, or earlier
+        connections.
+
+        Args:
+            connections (list(Connections)): a list of Connection objects. The first Connection in this list must reference the Ground.
+            name (str or int): the name of the MultiBody. Note, we do not allow duplicate MultiBody names.
+
+        Returns:
+            None
+
+        Example:
+
+            Define a MultiBody with one connections.
+
+                >>> from skydy.rigidbody import Body, BodyCoordinate, BodyForce, BodyTorque, Ground, GroundCoordinate
+                >>> from skydy.connectors import Connectors, DOF, Joint
+                >>> # Let's define a MultiBody (car) that moves in the x-direction only
+                >>> # Provide some dimensions
+                >>> l_car, w_car, h_car = 2, 1, 1
+                >>> car_name = "1"
+                >>> # Define the body
+                >>> b_car = Body(car_name)
+                >>> # Instantiate the car's dimensions
+                >>> b_car.dims.assign_values([l_car, w_car, h_car])
+                >>> # Add force to car in the car's x-coordinaate.
+                >>> F1 = BodyForce(name="1", x_dir=True)
+                >>> # Force is applied at the COM
+                >>> force_loc = BodyCoordinate("PF1", 0, 0, 0)
+                >>> # Add the force at the location
+                >>> b_car.add_force(F1, force_loc)
+                >>> # Instantiate the ground
+                >>> b_gnd = Ground()
+                >>> p_gnd = GroundCoordinate()
+                >>> # Location of car wrt ground
+                >>> p_car = BodyCoordinate("G1/O", 0, 0, 0)
+                >>> # Degrees of freedom
+                >>> car_dofs = [DOF(0)]
+                >>> # Ground to car joint
+                >>> j1 = Joint(p_gnd, p_car, car_dofs, name=p_gnd.name)
+                >>> # The connection of the bodies through the joint
+                >>> cnx_car = Connection(b_gnd, j1, b_car)
+                >>> # The multibody object
+                >>> oned_car = MultiBody([cnx_car], "car")
+
+        """
         # Body accounting
         MultiBody.id_counter += 1
 
@@ -92,9 +143,26 @@ class MultiBody:
             self._connections = val
 
     def add_connection(self, connection):
-        self.connections.append(connection)
+        """Add a connection to the MultiBody
+
+        Args:
+            connection (Connection): a connection we want to to add.
+
+        Returns:
+            None
+        """
+        pass
 
     def __forward_kinematics(self):
+        """Calculate the forward kinematics of the object.
+
+        This essentially takes all the information encoded in the connections and
+        deteremines the generalised coordinates (free) for the body.
+
+        This method methodically marches through the Connections and calculates
+        the global positions and orientations based of each Body. The position
+        and rotation matrices are updated in place.
+        """
         for cnx in self.connections:
             if self.bodies.get(cnx.body_in.name, False):
                 # need to set the global position of the input body
@@ -119,6 +187,16 @@ class MultiBody:
         self.accelerations = sym.Matrix(self.accelerations)
 
     def __forces_and_torques(self):
+        """Calculates global representation of the body forces and torques
+        applied to each body.
+
+        Using the forward kinematics, we translate and rotate the body forces
+        and torques to give them global meaning.
+
+        We will then use the pairs of global directions and locations to
+        calculate the generalised forces.
+
+        """
         for body in self.bodies.values():
             # Calculate the globl magnitude, direction and location of forces and torques
             for F, P in body.linear_forces:
@@ -134,6 +212,7 @@ class MultiBody:
                 self.torques.append((loc_torque, T.symbols(), T.name))
 
     def __calculate_energy(self):
+        """Calculate the kinetic energy and potential energy of the MultiBody."""
         # Global gravity vector
         g = sym.Matrix([0, 0, 1])
 
@@ -144,6 +223,11 @@ class MultiBody:
         self.potential_energy = PE
 
     def __ke_metric(self):
+        """The Riemannian Metric, G, with entry
+
+        G_ij = (d/dq^i)(d/dq^j)*KE.
+
+        """
         G = sym.Matrix(
             [
                 [
@@ -157,6 +241,7 @@ class MultiBody:
         self.G = G
 
     def __el_equations(self):
+        """Calculate the EL equations for the generalised coordinates and forces."""
         # Get unforced dynamics
         dyn_g = sym.zeros(self.G.shape[0], 1)
         L = self.kinetic_energy - self.potential_energy
@@ -192,6 +277,28 @@ class MultiBody:
             self.__rhs = -(self.eom - self.__lhs) + self.gen_forces
 
     def get_equilibria(self, unforced=True):
+        """Get the equilibria configurations for the MultiBody.
+
+        Equilibria exist at configurations when the velocities and
+        accelerations are zero. They can be forced or unforced.
+
+        For a system with EOMs of the form:
+            x'' = f(x, x', u)
+
+        The unforced equlibria are the x0 such that
+            f(x0, 0, 0) = 0.
+
+        The forced equilibria, x0, u0, satisfy
+            f(x0, 0, u0) = 0.
+
+        Args:
+            unforced (bool): returns the forced or unforced equilbria
+
+        Returns:
+            coord_eum (sympy.matrix): the coordinate equilibria values.
+            force_eum (sympy.matrix): the force equilibria values
+
+        """
         if not self.connections:
             return None, None
 
@@ -214,6 +321,7 @@ class MultiBody:
         return coord_eum, force_eum
 
     def force_symbols(self):
+        """Returns the force symbols. We have to remove the coordinates and time symbols."""
         return list(
             set(self.gen_forces.free_symbols)
             - set(self.coordinates)
@@ -221,9 +329,44 @@ class MultiBody:
         )
 
     def eoms(self):
+        """return the LHS and RHS of the equations of motion,
+
+        The LHS is the Riemannian Metric times the accelerations.
+        The RHS is the Generalised Forces minus the potential functions,
+        less any other dissipative forces.
+
+        """
         return self.__lhs, self.__rhs
 
     def system_matrices(self, linearized=False):
+        """Returns the linear or non-linear system matrices.
+
+        Assume the MultiBody state x = (q, dq), where q are the
+        generalised coordintae, and dq the associated velocities.
+
+        Then the system is described by:
+
+            M * x' = f(x, u),
+
+        where M is a block matrix with diagonal entries of the Identity
+        and the Riemannian metric, i.e., M = blockdiag(I, G)
+
+        The linear system matrices are then defined by:
+
+            M * x' = A * x + B * u
+
+        where A = d/dx(f(x, u)), and B = d/du(f(x, u)).
+
+        To avoid overly complex expressions, we keep the M matrix on the LHS.
+
+        Args:
+            linearized (bool): Return the linearized (or linear state-space) representation of the system, or nonlinear.
+
+        Returns:
+            A (sympy.matrix): the linear or nonlinear state transitions matrix.
+            B (sympy.matrix)) the linear input matrix. If linearized=False, this is just the appropriately sized zero matrix.
+
+        """
         f = self.force_symbols()
 
         self.__l = sym.Matrix.vstack(self.velocities, self.accelerations)
@@ -257,6 +400,9 @@ class MultiBody:
         return sym.simplify(A), sym.simplify(B)
 
     def get_configuration(self):
+        """Print the configuration, coordinates, dimensions of the bodies
+        in the MultiBody object.
+        """
         config_dict = {
             name: {"coords": body.as_dict(), "dims": body.dims.as_dict()}
             for name, body in self.bodies.items()
@@ -268,6 +414,7 @@ class MultiBody:
         #     yaml.dump(config_dict, yaml_file, default_flow_style=False)
 
     def __latex_fk_maps(self):
+        """Latex helper"""
         fk_maps = [
             "\\Pi_{"
             + body.name
@@ -281,6 +428,7 @@ class MultiBody:
         return latexify(fk_maps)
 
     def __latex_lagrangian(self):
+        """Latex helper"""
         # Lagrangian
         t_plus_v = sym.latex(sym.simplify(self.kinetic_energy + self.potential_energy))
 
@@ -288,6 +436,7 @@ class MultiBody:
         return latexify(str_lagrangian)
 
     def __latex_forces_and_torques(self):
+        """Latex helper"""
         # Forces
         forces = []
         torques = []
@@ -317,16 +466,19 @@ class MultiBody:
         return latexify(forces + torques)
 
     def __latex_coordinates(self):
+        """Latex helper"""
         # Coordintes
         coordinates = "q_{" + self.name + "} = " + sym.latex(self.coordinates)
         coordinates = coordinates.replace("[", "(").replace("]", ")")
         return latexify(coordinates)
 
     def __latex_ke_metric(self):
+        """Latex helper"""
         ke_metric = "G = " + sym.latex(self.G)
         return latexify(ke_metric)
 
     def __latex_eoms(self, linearized):
+        """Latex helper"""
         # Equations of motion
         A, B = self.system_matrices(linearized)
 
@@ -354,6 +506,19 @@ class MultiBody:
     def as_latex(
         self, linearized=False, output_dir=None, file_name=None, include_diag=True
     ):
+        """Generate the latex and pdf document deriving the equations of motion of the
+        MultiBody object. Uses the skydy.output.LatexDocument object.
+
+        Args:
+            linearized (bool): display the linear or nonlinear system matrices
+            output_dir (str or None): location to generate the .tex and .pdf outputs.
+            file_name (str or None): name for the .tex and .pdf files.
+            include_diag (bool): include the matplotlib generated diagram of the mutlibody.
+
+        Returns:
+            None.
+
+        """
 
         output_dir = get_output_dir(output_dir)
 
@@ -440,6 +605,14 @@ class MultiBody:
         return ax
 
     def draw(self, output_dir=None, save_fig=True):
+        """Draw the MultiBody object. Uses the Body and Connection draw
+        methods.
+
+        Args:
+            output_dir (str or None): location to generate the .tex and .pdf outputs.
+            save_fig (bool): save or simply render the drawing.
+        """
+
         output_dir = get_output_dir(output_dir)
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
@@ -464,10 +637,20 @@ class MultiBody:
         return ax, output_dir
 
     def symbols(self):
+        """Return the free symbols for the equations of motion."""
         return self.eom.free_symbols
 
 
 def latexify(string_item):
+    """Recursive function to turn a string, or sympy.latex to a
+    latex equation.
+
+    Args:
+        string_item (str): string we want to make into an equation
+
+    Returns:
+        equation_item (str): a latex-able equation.
+    """
     if isinstance(string_item, list):
         return "\n".join([latexify(item) for item in string_item])
     else:

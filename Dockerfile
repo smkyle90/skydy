@@ -4,6 +4,8 @@ FROM python:3.9.5-slim-buster
 RUN apt-get update && apt-get -y --no-install-recommends install \
     # software-properties-common \
     # build-essential \
+    make \
+    git \
     python3-tk \
     texlive-latex-base \
     texlive-fonts-recommended \
@@ -20,6 +22,8 @@ RUN pip install --upgrade pip
 # packages, thus the two COPY / RUN statement pairs should speed up rebuilds
 COPY ./requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+
+RUN pre-commit install
 
 # Copy the current directory contents into the container at /skydy
 COPY . /skydy/

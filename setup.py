@@ -16,7 +16,7 @@ skydy_packages = [
 
 setuptools.setup(
     name="skydy",
-    version="0.0.1",
+    version="0.0.1b",
     author="Scott Kyle",
     author_email="scott.m.kyle@gmail.com",
     description="A package to programmatically model inter-connected mechanical systems.",
@@ -24,6 +24,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/smkyle90/skydy",
     project_urls={
+        "Documentation": "https://skydy.readthedocs.io/",
         "Bug Tracker": "https://github.com/smkyle90/skydy/issues",
     },
     classifiers=[

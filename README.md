@@ -17,8 +17,10 @@ _Contents:_
 
 ## Background
 
+Welcome to SkyDy—a *Dy*namics package for Python built by me, *S*cott *Ky*le.
+
 The purpose of this repository is to provide a way to programmatically define an
-inter-connected mechnical system (IMCS) -- a collection of rigid bodies -- to ultimately determine its:
+inter-connected mechnical system (ICMS)—a collection of rigid bodies—to ultimately determine its:
 - coordinate system;
 - forward kinematic maps;
 - kinetic and potential energy;
@@ -27,13 +29,13 @@ inter-connected mechnical system (IMCS) -- a collection of rigid bodies -- to ul
 - equations of motion;
 - forced and unforced equilibria.
 
-The idea is to have a fully integrated way to define and describe IMCS, and produce useful content. Note, we refer the user to Geometric Control of Mechanical Systems (Bullo & Lewis) for definitions and descriptons used throughout.
+The idea is to have a fully integrated way to define and describe ICMS, and produce useful content. Note, we refer the user to [Geometric Control of Mechanical Systems (Bullo & Lewis)](https://link.springer.com/book/10.1007/978-1-4899-7276-7) for definitions and descriptons used throughout.
 
-IMCS are typically "simple" to scribble down on a piece of paper, but notoriously "difficult" to understand how they move (or model correctly). Even with two bodies, the book-keeping and accounting on the rotation matrices alone renders the modelling task cumbersome and error prone. This repository is here to (help) solve that.
+ICMS are typically "simple" to scribble down on a piece of paper, but notoriously "difficult" to understand how they move (or model correctly). Even with two bodies, the book-keeping and accounting on the rotation matrices alone renders the modelling task cumbersome and error prone. This repository is here to (help) solve that.
 
 The goal is to be able to take a schematic drawing from paper, and by methodically using code,
 define the ICMS. The output of this effort can be one, or many of the following:
-1. A diagram of the IMCS.
+1. A diagram of the ICMS.
 2. A latex document (and PDF), deriving equations of motion.
 3. A symbolic representation, that can be used a starting point for running simulations.
 
@@ -60,7 +62,7 @@ For this methodology, **all definitions and descriptions are done in a Body's co
         1. `git clone https://github.com/smkyle90/skydy.git`
         2. `cd skydy`
         3. `make build`
-2. Using pip and PyPi (see note):
+2. Using pip and [PyPi](https://pypi.org/project/skydy/) (see note):
     1. `pip install skydy`.
 
 **Note: For `1.1` and `2.1`, OS level dependencies include `python3-tk` and `pdflatex`.**
@@ -70,11 +72,15 @@ For this methodology, **all definitions and descriptions are done in a Body's co
 We encourage the reader to review the [`examples`](https://github.com/smkyle90/skydy/tree/main/examples) folder for some basic examples. There are useable `.py` files in the `python` directory, as well as interative notebooks. The collection of examples are the simplest, yet most common, systems this modelling methodology can be used on, and include:
 1. A one-dimensional cart that moves in the x-coordinate.
 2. A one-dimensional pendulum that rotates about an axis.
-3. A cart-pendulum -- a combination of the two systems above.
-4. A hovercraft -- an object that can move in two-dimensions and rotate.
+3. A cart-pendulum—a combination of the two systems above.
+4. A hovercraft—an object that can move in two-dimensions and rotate.
 5. A double pendulum.
 
+
 For step-by-step development, the user is encouraged to run their code in an interactive notebook. This will leverage the power of `Sympy` and the `skydy` process. The Docker image associated with this repository has Jupyter installed. To enter an interactive session, simply run `jupyter notebook --allow-root` from the container and copy and paste the address the terminal provides into your browser of choice.
+
+### Documentation
+Skydy documentation can be found [here](https://skydy.readthedocs.io/en/latest/) on Read The Docs! The docs are aligned with the latest Github release.
 
 ## Running
 
@@ -103,18 +109,20 @@ The guidelines for contributing are laid out here. All members of the team have 
 
 ### TODO
 What I want to get done:
-- [ ] Documentation
+- [x] Documentation (Completed June 13, 2021. Docstrings added and infrastructure for Read The Docs & Sphinx autodocs.)
 - [ ] Decent Documentation
 - [ ] Thorough Documentation
+- [ ] Prettier Latex printing
 - [ ] Add mass data to a Body for MassMatrix and InertiaMatrix objects
 - [ ] Kinematically constrained objects
-- [ ] Linear and rotational springs and dampers
-- [ ] Faster Forward Kinemtics
+- [ ] Translationall and rotational springs and dampers
+- [ ] *Faster* Forward Kinemtics
+- [ ] Dig into `sympy.physics.mechanics` and their Lagrangian capabilties
 - [ ] Rotating forces
 - [ ] Simulations
 - [ ] Systems analysis, including:
     - [ ] Stability analysis
-    - [ ] Controllability (both Linear and Nonelinear)
+    - [ ] Controllability (both Linear and Nonlinear)
 - [ ] Control Design
 - [ ] Decrease the size of the Docker image
 - [ ] Add an image to Docker hub

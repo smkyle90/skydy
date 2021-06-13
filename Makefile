@@ -13,3 +13,7 @@ run:
 .PHONY: dev
 dev:
 		sudo ./scripts/dev.sh
+
+.PHONY: docs
+docs:
+		./scripts/docs.sh
