@@ -82,7 +82,7 @@ def test_MultiBody_draw(
     double_pendulum.draw()
 
 
-@pytest.mark.dev
+@pytest.mark.multibody
 def test_MultiBody_bad_types():
     from skydy.connectors import DOF, Connection, Joint
     from skydy.multibody import MultiBody
@@ -133,3 +133,23 @@ def test_MultiBody_bad_types():
     # Duplicate values
     with pytest.raises(ValueError):
         m = MultiBody([cnx_1, cnx_2, cnx_2])
+
+
+@pytest.mark.multibody
+def test_MultiBody_controllable(cart, cart_pendulum, hovercraft, pendulum):
+    print("c linear", cart.controllable())
+    print("c nonlinear", cart.controllable(False))
+    print("pen linear", pendulum.controllable())
+    print("pen nonlinear", pendulum.controllable(False))
+    print("cp linear", cart_pendulum.controllable())
+    print("cp nonlinear", cart_pendulum.controllable(False))
+    print("hc linear", hovercraft.controllable())
+    print("hc nonlinear", hovercraft.controllable(False))
+
+
+@pytest.mark.dev
+def test_MultiBody_poles(cart, cart_pendulum, hovercraft, pendulum):
+    print("c linear", cart.poles())
+    print("pen linear", pendulum.poles())
+    print("cp linear", cart_pendulum.poles())
+    print("hc linear", hovercraft.poles())

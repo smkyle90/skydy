@@ -364,16 +364,17 @@ class MultiBody:
 
         Returns:
             A (sympy.matrix): the linear or nonlinear state transitions matrix.
-            B (sympy.matrix)) the linear input matrix. If linearized=False, this is just the appropriately sized zero matrix.
+            B (sympy.matrix): the linear input matrix. If linearized=False, this is just the appropriately sized zero matrix.
 
         """
-        f = self.force_symbols()
-
-        self.__l = sym.Matrix.vstack(self.velocities, self.accelerations)
-        self.__q = sym.Matrix.vstack(self.coordinates, self.velocities)
-        self.__u = sym.Matrix(f)
 
         if linearized:
+            f = self.force_symbols()
+
+            self.__l = sym.Matrix.vstack(self.velocities, self.accelerations)
+            self.__q = sym.Matrix.vstack(self.coordinates, self.velocities)
+            self.__u = sym.Matrix(f)
+
             # Input matrix.
             B = self.__rhs.jacobian(f)
             U = B
@@ -395,9 +396,88 @@ class MultiBody:
             A[ns:, ns:] = -C
         else:
             A = sym.Matrix.vstack(self.velocities, self.__rhs)
-            B = sym.zeros(*self.__rhs.shape)
+            B = sym.zeros(*A.shape)
 
         return sym.simplify(A), sym.simplify(B)
+
+    def poles(self):
+        """Get the open loop poles of the Linearized system.
+
+        This is just the eigenvalues of linearized state transition matrix, A.
+        """
+
+        A, _ = self.system_matrices(True)
+
+        print(self.get_equilibria())
+
+        return A.eigenvals()
+
+    def controllable(self, linear=True, max_iters=100):
+        """Determine if is Controllable or Small Time Locally Accessible (STLA).
+
+        For a linear system of the form x' = Ax + Bu, this is if the Controllability
+        Gramian C = [B AB ... A^(n-1)B] has dimension N.
+
+        For a nonlinear system of the form x' = f0 + f(x, u), this is if the span of
+        Lie brackets has dimension N. The Lie bracket of two vectors f and g, [f, g] = (df/dx)g - (dg/dx)f.
+
+        Args:
+            linear (bool): determine controllability for the linearized system. Default is True.
+            max_iters (int): maximum number of iterations for the Lie Bracket.
+
+        Returns:
+            controllable (true): if the system is Controllable (linear), or Small Time Locally Accessible (nonlinear), as per the definitions above.
+
+        """
+        A, B = self.system_matrices(linear)
+
+        if linear:
+            # Number of states, i.e., positions and velocities
+            n_states, _ = A.shape
+            for i in range(n_states):
+                if i == 0:
+                    res = B
+                    ctrb = res
+                else:
+                    res = A * res
+                    ctrb = sym.Matrix.hstack(ctrb, res)
+            return ctrb.rank() == n_states
+        else:
+            n_coords = len(self.coordinates)
+            f0 = self.force_symbols()
+            input_vec = A.jacobian(f0)
+            drift_vec = A - input_vec @ sym.Matrix(f0)
+
+            # Input vector fields. We will get Distribution, so only the dynamic coordinates.
+            distribution = sym.Matrix.hstack(drift_vec, input_vec)[n_coords:, :]
+
+            # We will check all combination using a some list accounting. We need two lists.
+            checked_vecs = []
+
+            # We need a list of the independent vector fields. Do not include zero vectors.
+            unchecked_vecs = [
+                sym.Matrix(vec) for vec in distribution.T.tolist() if sum(vec)
+            ]
+
+            while unchecked_vecs and (distribution.rank() < n_coords) and max_iters:
+                f = unchecked_vecs.pop()
+
+                for g in checked_vecs:
+                    lie_fg = lie_bracket(f, g, self.coordinates)
+
+                    # If zero, we don't want to do anything
+                    if sum(lie_fg) == 0:
+                        continue
+                    # If we have already checked the resulting Lie Bracket, we do not add.
+                    elif (lie_fg not in checked_vecs) and (-lie_fg not in checked_vecs):
+                        unchecked_vecs.append(lie_fg)
+                        distribution = sym.Matrix.hstack(distribution, lie_fg)
+
+                checked_vecs.append(f)
+                max_iters -= 1
+
+            # Dimension of span of Lie distribution must equal number degrees of freeom.
+            return distribution.rank() == n_coords
 
     def get_configuration(self):
         """Print the configuration, coordinates, dimensions of the bodies
@@ -655,3 +735,23 @@ def latexify(string_item):
         return "\n".join([latexify(item) for item in string_item])
     else:
         return "\\begin{equation}" + str(string_item) + "\\end{equation} \\\\"
+
+
+def lie_bracket(f, g, q):
+    """Take the Lie bracket of two vector fields.
+
+    [f, g] = (d/dq)f * g - (d/dq)g * f
+
+    Args:
+        f (sympy.matrix): an N x 1 symbolic vector
+        g (sympy.matrix): an N x 1 symbolic
+        q (sympy.matrix or List): a length N array like object of coordinates to take partial derivates.
+
+    Returns:
+        [f, g] (sympy.matrix): the Lie bracket of f and g, an N x 1 symbolic vector
+
+    """
+
+    assert f.shape == g.shape
+    assert len(f) == len(q)
+    return f.jacobian(q) @ g - g.jacobian(q) @ f
