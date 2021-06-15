@@ -87,22 +87,22 @@ class Connection:
         Updates the attribute values in place.
 
         Diagram:
-        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2
-        ⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀⠀⠀/
-        ⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀/
-        ⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____---->X-----_____⠀⠀⠀⠀\\/
-        ⠀⠀⠀|/....----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀----->O2----x2
-        ⠀⠀⠀O1-------x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2
-        ⠀⠀⠀^G1
 
+        |  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2
+        |  ⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀⠀⠀/
+        |  ⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀/
+        |  ⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____---->X-----_____⠀⠀⠀⠀\\/
+        |  ⠀⠀⠀|/....----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀----->O2----x2
+        |  ⠀⠀⠀O1-------x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2
+        |  ⠀⠀⠀^G1
 
-        p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J).
-        p_O2 = p_in + p_j_in + add_dof + p_out_j.
-
-        p_in: Global coordinate of COM of input link
-        p_j_in: Rotated position of joint on input link
-        p_out_j: Relative position of COM in global frame of output link wrt joint
-        add_dof: Additional DOFs from joint, in the input link's coordinate Frame.
+        |  Thus,
+        |  p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J) = p_in + p_j_in + add_dof + p_out_j,
+        |  where
+        |  p_in: Global coordinate of COM of input link.
+        |  p_j_in: Rotated position of joint on input link.
+        |  p_out_j: Relative position of COM in global frame of output link wrt joint.
+        |  add_dof: Additional DOFs from joint, in the input link's coordinate Frame.
 
         """
 

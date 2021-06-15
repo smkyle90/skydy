@@ -57,24 +57,34 @@
 <span class="sd">        assumed to be constrained at a value of zero.</span>
 
 <span class="sd">        Diagram:</span>
-<span class="sd">                                                z2  y2</span>
-<span class="sd">            z1  y1                              |  /</span>
-<span class="sd">            |  /               p_j              | /</span>
-<span class="sd">            | /       ____----&gt;x&lt;----_____      |/</span>
-<span class="sd">            |/....----                    ------O2-------x2</span>
-<span class="sd">            O1-------x1                         ^G2</span>
-<span class="sd">            ^G1</span>
 
-<span class="sd">        Let Body 1 have CoM at O1, Body 2 have CoM at O2, and let a Joint</span>
-<span class="sd">        exists at the point p_j. The point p_j can be described in both</span>
-<span class="sd">        Body 1 and Body 2&#39;s coordinate frames. Note, the coordinate frames</span>
-<span class="sd">        need not be aligned, or pointing in the same direction.</span>
+<span class="sd">        |  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2</span>
+<span class="sd">        |  ⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\⠀⠀⠀/</span>
+<span class="sd">        |  ⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\⠀/</span>
+<span class="sd">        |  ⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____----&gt;X-----_____⠀⠀⠀⠀\/</span>
+<span class="sd">        |  ⠀⠀⠀|/....----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀-----&gt;O2----x2</span>
+<span class="sd">        |  ⠀⠀⠀O1-------x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2</span>
+<span class="sd">        |  ⠀⠀⠀^G1</span>
 
-<span class="sd">        The body_in_coord, say this is Body 1, is the vector from 01 -&gt; p_j in (x1, y1, z1).</span>
-<span class="sd">        The body_out_coord, say this is Body 2, is the vector from 02 -&gt; p_j in (x2, y2, z2).</span>
+<span class="sd">        |  Let:</span>
+<span class="sd">        |  - Body 1 have CoM at O1, position r1, and orientation R1;</span>
+<span class="sd">        |  - Body 2 have CoM at O2, position r2, and orientation R2;</span>
+<span class="sd">        |  - suppose a there is a Joint at the point p_j.</span>
 
-<span class="sd">        The degrees of freedom are defined as motion in the input Body&#39;s</span>
-<span class="sd">        coordinate frame.</span>
+<span class="sd">        |  Then, the point p_j can be described in both Body 1 and Body 2&#39;s coordinate frames, and given by:</span>
+<span class="sd">        |  - body_in_coord (Body 1) is the vector from O1 -&gt; p_j in (x1, y1, z1), designated P_J/O1;</span>
+<span class="sd">        |  - body_out_coord (Body 2), is the vector from p_j -&gt; O2 in (x2, y2, z2), designated P_O2/J.</span>
+
+<span class="sd">        The degrees of freedom are defined as motion in the input Body&#39;s coordinate frame, and is equivalent to</span>
+<span class="sd">        the body position of r2 and orientation R2, with the joint DOFs applied to this body&#39;s coordinates.</span>
+
+<span class="sd">        This means that with knowledge of the input body position and orientation, DOFs, and the two vectors O1 -&gt; p_j and</span>
+<span class="sd">        p_j -&gt; O2, the global position and orientation of the output is defined by</span>
+
+<span class="sd">        |  p_O2 = p_O1 + R1 * (P_J/O1 + P_J/dof + R2 * P_O2/J),</span>
+<span class="sd">        |  p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J).</span>
+
+<span class="sd">        Note, these are exactly the calculations that are done by the Connection object when calculating the global configuration.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            body_in_coord (BodyCoordinate): the location of the joint in the input body&#39;s coordinate frame.</span>

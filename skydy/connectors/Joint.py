@@ -24,22 +24,23 @@ class Joint:
         assumed to be constrained at a value of zero.
 
         Diagram:
-        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2
-        ⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀⠀⠀/
-        ⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀/
-        ⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____---->X-----_____⠀⠀⠀⠀\\/
-        ⠀⠀⠀|/....----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀----->O2----x2
-        ⠀⠀⠀O1-------x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2
-        ⠀⠀⠀^G1
 
-        Let:
-        - Body 1 have CoM at O1, position r1, and orientation R1;
-        - Body 2 have CoM at O2, position r2, and orientation R2;
-        - suppose a there is a Joint at the point p_j.
+        |  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀y2
+        |  ⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀⠀⠀/
+        |  ⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀/
+        |  ⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____---->X-----_____⠀⠀⠀⠀\\/
+        |  ⠀⠀⠀|/....----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀----->O2----x2
+        |  ⠀⠀⠀O1-------x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2
+        |  ⠀⠀⠀^G1
 
-        Then, the point p_j can be described in both Body 1 and Body 2's coordinate frames, and given by:
-        - body_in_coord (Body 1) is the vector from O1 -> p_j in (x1, y1, z1), designated P_J/O1;
-        - body_out_coord (Body 2), is the vector from p_j -> O2 in (x2, y2, z2), designated P_O2/J.
+        |  Let:
+        |  - Body 1 have CoM at O1, position r1, and orientation R1;
+        |  - Body 2 have CoM at O2, position r2, and orientation R2;
+        |  - suppose a there is a Joint at the point p_j.
+
+        |  Then, the point p_j can be described in both Body 1 and Body 2's coordinate frames, and given by:
+        |  - body_in_coord (Body 1) is the vector from O1 -> p_j in (x1, y1, z1), designated P_J/O1;
+        |  - body_out_coord (Body 2), is the vector from p_j -> O2 in (x2, y2, z2), designated P_O2/J.
 
         The degrees of freedom are defined as motion in the input Body's coordinate frame, and is equivalent to
         the body position of r2 and orientation R2, with the joint DOFs applied to this body's coordinates.
@@ -47,8 +48,8 @@ class Joint:
         This means that with knowledge of the input body position and orientation, DOFs, and the two vectors O1 -> p_j and
         p_j -> O2, the global position and orientation of the output is defined by
 
-        p_O2 = p_O1 + R1 * (P_J/O1 + P_J/dof + R2 * P_O2/J),
-        p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J).
+        |  p_O2 = p_O1 + R1 * (P_J/O1 + P_J/dof + R2 * P_O2/J),
+        |  p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J).
 
         Note, these are exactly the calculations that are done by the Connection object when calculating the global configuration.
 
