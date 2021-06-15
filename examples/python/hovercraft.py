@@ -50,3 +50,9 @@ cnx_hc = Connection(b_gnd, j1, b_hc)
 
 # The multibody object
 hovercraft = MultiBody([cnx_hc], "hc")
+
+# Draw the system
+hovercraft.draw(save_fig=True)
+
+# Create the latex
+hovercraft.as_latex()

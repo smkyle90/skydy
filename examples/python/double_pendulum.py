@@ -49,3 +49,9 @@ cnx_p2 = Connection(b_p1, j2, b_p2)
 
 # The multibody object
 double_pen = MultiBody([cnx_p1, cnx_p2], "dp")
+
+# Draw the system
+double_pen.draw(save_fig=True)
+
+# Create the latex
+double_pen.as_latex()

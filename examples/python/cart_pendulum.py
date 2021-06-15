@@ -58,3 +58,9 @@ cnx_pen = Connection(b_car, j2, b_pen)
 
 # The multibody object
 cart_pen = MultiBody([cnx_car, cnx_pen], "cp")
+
+# Draw the system
+cart_pen.draw(save_fig=True)
+
+# Create the latex
+cart_pen.as_latex()
