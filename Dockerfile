@@ -23,7 +23,7 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-RUN pre-commit install
+# RUN pre-commit install
 
 # Copy the current directory contents into the container at /skydy
 COPY . /skydy/
