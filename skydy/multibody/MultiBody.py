@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import sympy as sym
 
+from ..analysers import lie_bracket
 from ..connectors import Connection
 from ..output import Arrow3D, LatexDocument, get_output_dir
 from ..rigidbody import Ground
@@ -113,6 +114,13 @@ class MultiBody:
         self.__forces_and_torques()
         self.__el_equations()
 
+    def __del__(self):
+        """Overwrite destructor to remove MultiBody name from list,
+        and decrease the MultuBody counter.
+        """
+        MultiBody.id_names.remove(self.name)
+        MultiBody.id_counter -= 1
+
     @property
     def connections(self):
         return self._connections
@@ -198,7 +206,7 @@ class MultiBody:
 
         """
         for body in self.bodies.values():
-            # Calculate the globl magnitude, direction and location of forces and torques
+            # Calculate the global magnitude, direction and location of forces and torques
             for F, P in body.linear_forces:
                 loc_force = body.pos_body + body.rot_body @ P.symbols()
                 dir_force = body.rot_body @ F.symbols()
@@ -241,7 +249,11 @@ class MultiBody:
         self.G = G
 
     def __el_equations(self):
-        """Calculate the EL equations for the generalised coordinates and forces."""
+        """Calculate the EL equations for the generalised coordinates and forces.
+
+        For a Lagrangian, L = T - V, are minimized by when (d/dt)(dL/d(dq)^i) - (dL/dq^i) = Q_i.
+
+        """
         # Get unforced dynamics
         dyn_g = sym.zeros(self.G.shape[0], 1)
         L = self.kinetic_energy - self.potential_energy
@@ -314,9 +326,13 @@ class MultiBody:
         # Ensure 0s are evaluated
         RHS = sym.simplify(RHS)
 
-        # get the force symbols
         coord_eum = sym.solve(RHS, self.coordinates)
         force_eum = sym.solve(RHS, f0)
+
+        # Package into a dictionary for later substitution
+        coord_eum = [
+            {self.coordinates[idx]: v for idx, v in enumerate(eum)} for eum in coord_eum
+        ]
 
         return coord_eum, force_eum
 
@@ -338,7 +354,7 @@ class MultiBody:
         """
         return self.__lhs, self.__rhs
 
-    def system_matrices(self, linearized=False):
+    def system_matrices(self, linearized=False, m_on_lhs=True):
         """Returns the linear or non-linear system matrices.
 
         Assume the MultiBody state x = (q, dq), where q are the
@@ -359,21 +375,26 @@ class MultiBody:
 
         To avoid overly complex expressions, we keep the M matrix on the LHS.
 
+        If you would like the systems returned with M not on the LHS,
+        make m_on_lhs=False, and you will get x' = M^(-1) * f(x, u), x' = M^(-1) * (A * x + B * u).
+
         Args:
             linearized (bool): Return the linearized (or linear state-space) representation of the system, or nonlinear.
+            m_on_lhs (bool): if we want the inertial properties on the LHS, with the accelerations, or on the RHS with the states. The RHS requires the inverse of the M matrix to be taken, meaning it can get messy, quickly.
 
         Returns:
             A (sympy.matrix): the linear or nonlinear state transitions matrix.
-            B (sympy.matrix)) the linear input matrix. If linearized=False, this is just the appropriately sized zero matrix.
+            B (sympy.matrix): the linear input matrix. If linearized=False, this is just the appropriately sized zero matrix.
 
         """
-        f = self.force_symbols()
-
-        self.__l = sym.Matrix.vstack(self.velocities, self.accelerations)
-        self.__q = sym.Matrix.vstack(self.coordinates, self.velocities)
-        self.__u = sym.Matrix(f)
 
         if linearized:
+            f = self.force_symbols()
+
+            self.__l = sym.Matrix.vstack(self.velocities, self.accelerations)
+            self.__q = sym.Matrix.vstack(self.coordinates, self.velocities)
+            self.__u = sym.Matrix(f)
+
             # Input matrix.
             B = self.__rhs.jacobian(f)
             U = B
@@ -391,13 +412,196 @@ class MultiBody:
             C = self.__rhs.jacobian(self.velocities)
 
             A[:ns, ns:] = sym.eye(ns)
-            A[ns:, :ns] = -K
-            A[ns:, ns:] = -C
+            A[ns:, :ns] = K
+            A[ns:, ns:] = C
         else:
             A = sym.Matrix.vstack(self.velocities, self.__rhs)
-            B = sym.zeros(*self.__rhs.shape)
+            B = sym.zeros(*A.shape)
 
-        return sym.simplify(A), sym.simplify(B)
+        if m_on_lhs:
+            return sym.simplify(A), sym.simplify(B)
+        else:
+            nq, _ = self.coordinates.shape
+            M = sym.zeros(2 * nq, 2 * nq)
+            M[:ns, :ns] = sym.eye(nq)
+            M[ns:, ns:] = self.G
+            return sym.simplify(M.inv() @ A), sym.simplify(M.inv() @ B)
+
+    def poles(self, evaluate=False):
+        """Get the open loop poles of the Linearized system.
+
+        This is just the eigenvalues of linearized state transition matrix, A, at an equilibrium condition.
+
+        We need the intertial properties on the RHS, with the A matrix.
+
+        Args:
+            evaluate (True): whether to substitute the dimension and inertial values in. Prevents overloy complex expressions and thus, long calcultion times.
+
+        Returns:
+            eig_A (dict): k-v pairs are eigenvalues of the linearlised A matrices and multiplicity.
+
+        """
+
+        A, _ = self.system_matrices(True)
+
+        if evaluate:
+            # Velocities are zero at all equilibria
+            vel_eum = {v: 0 for v in self.velocities}
+            dim_dict = self.get_dimensions()
+            inertia_dict = self.get_inertias()
+
+            A = A.subs(vel_eum)
+            A = A.subs(dim_dict)
+            A = A.subs(inertia_dict)
+            A = sym.simplify(A)
+
+        return A.eigenvals()
+
+    def is_stable(self):
+        """Determine if a configuration around a certain equilibria is stable,
+        as defined by the values of the poles of the Linearized sytem evaluated
+        at each equilbrium.
+
+        Args:
+            self
+
+        Returns:
+            stable_eum (list): a list of [eum, stable] pairs, where eum is the equilibrium
+            values and stable if that system is stable in that configuration.
+        """
+
+        sys_poles = self.poles(evaluate=True)
+        sys_eum, _ = self.get_equilibria()
+
+        stable_eum = []
+        for eum in sys_eum:
+            # Assume the eum is stable, i.e., re <= 0.
+            this_eum = [eum, True]
+            for pole, mult in sys_poles.items():
+                pole = pole.subs(eum)
+
+                re, im = pole.as_real_imag()
+
+                if re > 0:
+                    this_eum[1] = False
+
+            stable_eum.append(this_eum)
+
+        return stable_eum
+
+    def controllable(self, linear=True, max_iters=100):
+        """Determine if is Controllable or Small Time Locally Accessible (STLA).
+
+        For a linear system of the form x' = Ax + Bu, this is if the Controllability
+        Gramian C = [B AB ... A^(n-1)B] has dimension N, where N is the number of states.
+
+        For a nonlinear system of the form x' = f0 + f(x, u), this is if the span of
+        Lie brackets has dimension N, where N is the dimension of the configuration space.
+
+        The Lie bracket of two vectors f and g, [f, g] = (df/dx)g - (dg/dx)f.
+
+        Args:
+            linear (bool): determine controllability for the linearized system. Default is True.
+            max_iters (int): maximum number of iterations for the Lie Bracket.
+
+        Returns:
+            controllable (true): if the system is Controllable (linear), or Small Time Locally Accessible (nonlinear), as per the definitions above.
+
+        """
+        A, B = self.system_matrices(linear)
+
+        if linear:
+            # Number of states, i.e., positions and velocities
+            n_states, _ = A.shape
+            for i in range(n_states):
+                if i == 0:
+                    res = B
+                    ctrb = res
+                else:
+                    res = A * res
+                    ctrb = sym.Matrix.hstack(ctrb, res)
+            return ctrb.rank() == n_states
+        else:
+            n_coords = len(self.coordinates)
+            f0 = self.force_symbols()
+
+            # We need the input and drift vector fields
+            input_vec = A.jacobian(f0)
+            drift_vec = A - input_vec @ sym.Matrix(f0)
+
+            # Input vector fields. We will get Distribution, so only the dynamic coordinates.
+            distribution = sym.Matrix.hstack(drift_vec, input_vec)[n_coords:, :]
+
+            # We will check all combination using a some list accounting. We need two lists.
+            checked_vecs = []
+
+            # We need a list of the independent vector fields. Do not include zero vectors.
+            unchecked_vecs = [
+                sym.Matrix(vec)
+                for vec in distribution.T.tolist()
+                if not self.__is_zero_vec(vec)
+            ]
+
+            while unchecked_vecs and (distribution.rank() < n_coords) and max_iters:
+                f = unchecked_vecs.pop()
+
+                for g in checked_vecs:
+                    lie_fg = lie_bracket(f, g, self.coordinates)
+
+                    # If all zeros, we don't want to do anything
+                    if self.__is_zero_vec(lie_fg):
+                        continue
+                    # If we have already checked the resulting Lie Bracket, we do not add.
+                    elif (lie_fg not in checked_vecs) and (-lie_fg not in checked_vecs):
+                        unchecked_vecs.append(lie_fg)
+                        distribution = sym.Matrix.hstack(distribution, lie_fg)
+
+                checked_vecs.append(f)
+                max_iters -= 1
+
+            # Dimension of span of Lie distribution must equal number degrees of freeom.
+            return distribution.rank() == n_coords
+
+    def __is_zero_vec(self, test_vec):
+        """Determine if the vector is a vector of zeros.
+
+        Args:
+            test_vec (sympy.matrix): the matrix to check.
+
+        Returns
+            is_zero (bool): if the vector is all zeros.
+
+        """
+        test_vec = sym.Matrix(test_vec)
+        zero_vec = sym.zeros(*test_vec.shape)
+
+        return test_vec == zero_vec
+
+    def get_inertias(self):
+        inertia_dict = {sym.Symbol("g"): 9.81}
+        for body in self.bodies.values():
+            inertia_dict = {
+                **inertia_dict,
+                **body.mass_matrix.as_dict(),
+                **body.inertia_matrix.as_dict(),
+            }
+        return inertia_dict
+
+    def get_dimensions(self):
+        """Get all the dimensions associated with the MultiBody, from each body and Joint coordinates."""
+
+        dim_dict = {}
+        for body in self.bodies.values():
+            dim_dict = {**dim_dict, **body.dims.as_dict()}
+
+        for joint in self.joints.values():
+            dim_dict = {
+                **dim_dict,
+                **joint.body_in_coord.as_dict(),
+                **joint.body_out_coord.as_dict(),
+            }
+
+        return dim_dict
 
     def get_configuration(self):
         """Print the configuration, coordinates, dimensions of the bodies
@@ -576,31 +780,20 @@ class MultiBody:
 
         return ax
 
-    def __equalize_axes(self, ax, mult=0.5):
+    def __equalize_axes(self, ax):
 
         x_lim = ax.get_xlim3d()
         y_lim = ax.get_ylim3d()
         z_lim = ax.get_ylim3d()
 
-        x_min, x_max = min(-2, min(x_lim)), max(2, max(x_lim))
-        y_min, y_max = min(-2, min(y_lim)), max(2, max(y_lim))
-        z_min, z_max = min(-2, min(z_lim)), max(2, max(z_lim))
+        min_max_val = 2
+        x_min, x_max = min(-min_max_val, min(x_lim)), max(min_max_val, max(x_lim))
+        y_min, y_max = min(-min_max_val, min(y_lim)), max(min_max_val, max(y_lim))
+        z_min, z_max = min(-min_max_val, min(z_lim)), max(min_max_val, max(z_lim))
 
         ax.set_xlim3d(x_min, x_max)
         ax.set_ylim3d(y_min, y_max)
         ax.set_zlim3d(z_min, z_max)
-
-        # y0 = np.array(y_lim).mean()
-        # z0 = np.array(z_lim).mean()
-
-        # max_ax = 0
-        # for lim in [x_lim, y_lim, z_lim]:
-        #     dlim = np.abs(lim[1] - lim[0])
-        #     max_ax = max(dlim, max_ax)
-
-        # ax.set_xlim3d(x0 - mult * max_ax, x0 + mult * max_ax)
-        # ax.set_ylim3d(y0 - mult * max_ax, y0 + mult * max_ax)
-        # ax.set_zlim3d(z0 - mult * max_ax, z0 + mult * max_ax)
 
         return ax
 

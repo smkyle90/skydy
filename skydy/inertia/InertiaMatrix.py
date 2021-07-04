@@ -30,3 +30,6 @@ class InertiaMatrix:
     def as_mat(self):
         """Return the inertia matrix as a sympy.matrix."""
         return self.__mat
+
+    def as_dict(self):
+        return {s: 1 for s in self.__mat.free_symbols}

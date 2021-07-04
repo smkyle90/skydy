@@ -55,12 +55,7 @@ def cart():
     cnx_car = Connection(b_gnd, j1, b_car)
 
     # The multibody object
-    oned_car = MultiBody(
-        [
-            cnx_car,
-        ],
-        "car",
-    )
+    oned_car = MultiBody([cnx_car], "car")
 
     return oned_car
 
@@ -105,12 +100,7 @@ def pendulum():
     cnx_pen = Connection(b_gnd, j1, b_pen)
 
     # The multibody object
-    oned_pen = MultiBody(
-        [
-            cnx_pen,
-        ],
-        "pen",
-    )
+    oned_pen = MultiBody([cnx_pen], "pen")
 
     return oned_pen
 

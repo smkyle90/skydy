@@ -1,18 +1,17 @@
+import os
+
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-skydy_packages = [
-    "skydy",
-    "skydy.connectors",
-    "skydy.configuration",
-    "skydy.inertia",
-    "skydy.multibody",
-    "skydy.connectors",
-    "skydy.output",
-    "skydy.rigidbody",
-]
+path = "skydy"
+skydy_packages = [path]
+
+with os.scandir(path) as it:
+    for entry in it:
+        if entry.is_dir() and not entry.name.startswith("__"):
+            skydy_packages.append(f"{path}.{entry.name}")
 
 setuptools.setup(
     name="skydy",

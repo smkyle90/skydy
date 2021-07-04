@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>skydy.connectors package &#8212; SkyDy 0.0.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
@@ -32,12 +33,12 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="skydy-connectors-package">
+  <section id="skydy-connectors-package">
 <h1>skydy.connectors package<a class="headerlink" href="#skydy-connectors-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
+<section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-skydy.connectors.Connection">
+</section>
+<section id="module-skydy.connectors.Connection">
 <span id="skydy-connectors-connection-module"></span><h2>skydy.connectors.Connection module<a class="headerlink" href="#module-skydy.connectors.Connection" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="skydy.connectors.Connection.Connection">
@@ -47,6 +48,10 @@
 <dt class="sig sig-object py" id="skydy.connectors.Connection.Connection.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skydy/connectors/Connection.html#Connection.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#skydy.connectors.Connection.Connection.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Define the connection fo two bodies, through a joint.</p>
+<p>The rigour of this definition lies in the Joint. Refer to that object to correctly
+define that object, in order to easily define this object.</p>
+<p>The main consideration is that the body_in argument must align with Joint’s body_in_coord, and
+the body_out argument must relate to the Joint’s body_out_coord.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -141,6 +146,25 @@
 <dd><p>Propagate the configuration from the input body, to the output
 body through the joint.</p>
 <p>Updates the attribute values in place.</p>
+<p>Diagram:</p>
+<div class="line-block">
+<div class="line">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2</div>
+<div class="line">⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀/</div>
+<div class="line">⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀/</div>
+<div class="line">⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____—-&gt;X—–_____⠀⠀⠀⠀/</div>
+<div class="line">⠀⠀⠀|/….—-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀—–&gt;O2—-x2</div>
+<div class="line">⠀⠀⠀O1——-x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2</div>
+<div class="line">⠀⠀⠀^G1</div>
+</div>
+<div class="line-block">
+<div class="line">Thus,</div>
+<div class="line">p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J) = p_in + p_j_in + add_dof + p_out_j,</div>
+<div class="line">where</div>
+<div class="line">p_in: Global coordinate of COM of input link.</div>
+<div class="line">p_j_in: Rotated position of joint on input link.</div>
+<div class="line">p_out_j: Relative position of COM in global frame of output link wrt joint.</div>
+<div class="line">add_dof: Additional DOFs from joint, in the input link’s coordinate Frame.</div>
+</div>
 </dd></dl>
 
 <dl class="py property">
@@ -150,8 +174,8 @@ body through the joint.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-skydy.connectors.DOF">
+</section>
+<section id="module-skydy.connectors.DOF">
 <span id="skydy-connectors-dof-module"></span><h2>skydy.connectors.DOF module<a class="headerlink" href="#module-skydy.connectors.DOF" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="skydy.connectors.DOF.DOF">
@@ -209,8 +233,8 @@ or third arguments.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-skydy.connectors.Joint">
+</section>
+<section id="module-skydy.connectors.Joint">
 <span id="skydy-connectors-joint-module"></span><h2>skydy.connectors.Joint module<a class="headerlink" href="#module-skydy.connectors.Joint" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="skydy.connectors.Joint.Joint">
@@ -225,26 +249,36 @@ move relative to each other, based on the DOFs or constraints a joint has.</p>
 <p>By default, a joint is assumed to be free in all directions. If a user defines
 a free or non-free DOF, we account for it. Any unspecified coordintes indices are
 assumed to be constrained at a value of zero.</p>
-<dl>
-<dt>Diagram:</dt><dd><blockquote>
-<div><p>z2  y2</p>
-</div></blockquote>
-<p>z1  y1                              |  /
-|  /               p_j              | /
-| /       ____—-&gt;x&lt;—-_____      <a href="#id1"><span class="problematic" id="id2">|</span></a>/
-<a href="#id3"><span class="problematic" id="id4">|</span></a>/….—-                    ——O2——-x2
-O1——-x1                         ^G2
-^G1</p>
-</dd>
-</dl>
-<p>Let Body 1 have CoM at O1, Body 2 have CoM at O2, and let a Joint
-exists at the point p_j. The point p_j can be described in both
-Body 1 and Body 2’s coordinate frames. Note, the coordinate frames
-need not be aligned, or pointing in the same direction.</p>
-<p>The body_in_coord, say this is Body 1, is the vector from 01 -&gt; p_j in (x1, y1, z1).
-The body_out_coord, say this is Body 2, is the vector from 02 -&gt; p_j in (x2, y2, z2).</p>
-<p>The degrees of freedom are defined as motion in the input Body’s
-coordinate frame.</p>
+<p>Diagram:</p>
+<div class="line-block">
+<div class="line">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2</div>
+<div class="line">⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀/</div>
+<div class="line">⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀/</div>
+<div class="line">⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____—-&gt;X—–_____⠀⠀⠀⠀/</div>
+<div class="line">⠀⠀⠀|/….—-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀—–&gt;O2—-x2</div>
+<div class="line">⠀⠀⠀O1——-x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2</div>
+<div class="line">⠀⠀⠀^G1</div>
+</div>
+<div class="line-block">
+<div class="line">Let:</div>
+<div class="line">- Body 1 have CoM at O1, position r1, and orientation R1;</div>
+<div class="line">- Body 2 have CoM at O2, position r2, and orientation R2;</div>
+<div class="line">- suppose a there is a Joint at the point p_j.</div>
+</div>
+<div class="line-block">
+<div class="line">Then, the point p_j can be described in both Body 1 and Body 2’s coordinate frames, and given by:</div>
+<div class="line">- body_in_coord (Body 1) is the vector from O1 -&gt; p_j in (x1, y1, z1), designated P_J/O1;</div>
+<div class="line">- body_out_coord (Body 2), is the vector from p_j -&gt; O2 in (x2, y2, z2), designated P_O2/J.</div>
+</div>
+<p>The degrees of freedom are defined as motion in the input Body’s coordinate frame, and is equivalent to
+the body position of r2 and orientation R2, with the joint DOFs applied to this body’s coordinates.</p>
+<p>This means that with knowledge of the input body position and orientation, DOFs, and the two vectors O1 -&gt; p_j and
+p_j -&gt; O2, the global position and orientation of the output is defined by</p>
+<div class="line-block">
+<div class="line">p_O2 = p_O1 + R1 * (P_J/O1 + P_J/dof + R2 * P_O2/J),</div>
+<div class="line">p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J).</div>
+</div>
+<p>Note, these are exactly the calculations that are done by the Connection object when calculating the global configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -300,11 +334,11 @@ coordinate frame.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-skydy.connectors">
+</section>
+<section id="module-skydy.connectors">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-skydy.connectors" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>

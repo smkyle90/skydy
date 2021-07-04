@@ -10,6 +10,12 @@ class Connection:
     def __init__(self, body_in, joint, body_out):
         """Define the connection fo two bodies, through a joint.
 
+        The rigour of this definition lies in the Joint. Refer to that object to correctly
+        define that object, in order to easily define this object.
+
+        The main consideration is that the body_in argument must align with Joint's body_in_coord, and
+        the body_out argument must relate to the Joint's body_out_coord.
+
         Args:
             body_in (Body): the input body
             joint (Joint): the joint, defined as a common location for the input and output bodies, and the associated DOFs. Note, it is critical here, that the joint's input coordinate is in body_in coordinate frame, and the output coordinate is in body_out coordinate frame.
@@ -79,30 +85,43 @@ class Connection:
         body through the joint.
 
         Updates the attribute values in place.
+
+        Diagram:
+
+        |  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2
+        |  ⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀⠀⠀/
+        |  ⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀/
+        |  ⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____---->X-----_____⠀⠀⠀⠀\\/
+        |  ⠀⠀⠀|/....----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀----->O2----x2
+        |  ⠀⠀⠀O1-------x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2
+        |  ⠀⠀⠀^G1
+
+        |  Thus,
+        |  p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J) = p_in + p_j_in + add_dof + p_out_j,
+        |  where
+        |  p_in: Global coordinate of COM of input link.
+        |  p_j_in: Rotated position of joint on input link.
+        |  p_out_j: Relative position of COM in global frame of output link wrt joint.
+        |  add_dof: Additional DOFs from joint, in the input link's coordinate Frame.
+
         """
+
+        # Apply the joint constraints to the output body. This defines
+        # the correct body position and orientation.
         for dof in self.joint.dof:
             if not dof.free:
                 self.body_out.apply_constraint(dof.idx, dof.const_value)
 
-        # TODO: draw a diagram to accompany this.
-
         # Propagate rotations from input body to output body
         self.body_out.rot_body = self.body_in.rot_body @ self.body_out.rot_body
 
-        # Get absolute positions
-        # Global coordinate of COM of input link
+        # Find the position of the output link's COM
         p_in = self.body_in.pos_body
-
-        # Rotated position of joint on input link
         p_j_in = self.body_in.rot_body @ self.joint.body_in_coord.symbols()
-
-        # Global position of COM of output link wrt joint
         p_out_j = self.body_out.rot_body @ self.joint.body_out_coord.symbols()
-
-        # Additional DOFs from joint, in the input links coordinate Frame.
         add_dof = self.body_in.rot_body @ self.body_out.pos_body
 
-        # The output links position is the sum of these 4 vectors
+        # The output link's position is the sum of these 4 vectors
         self.body_out.pos_body = p_in + p_j_in + p_out_j + add_dof
 
     def draw(self, ax=None, sub_vals=None):

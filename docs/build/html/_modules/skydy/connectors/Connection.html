@@ -43,6 +43,12 @@
 <div class="viewcode-block" id="Connection.__init__"><a class="viewcode-back" href="../../../skydy.connectors.html#skydy.connectors.Connection.Connection.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body_in</span><span class="p">,</span> <span class="n">joint</span><span class="p">,</span> <span class="n">body_out</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Define the connection fo two bodies, through a joint.</span>
 
+<span class="sd">        The rigour of this definition lies in the Joint. Refer to that object to correctly</span>
+<span class="sd">        define that object, in order to easily define this object.</span>
+
+<span class="sd">        The main consideration is that the body_in argument must align with Joint&#39;s body_in_coord, and</span>
+<span class="sd">        the body_out argument must relate to the Joint&#39;s body_out_coord.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            body_in (Body): the input body</span>
 <span class="sd">            joint (Joint): the joint, defined as a common location for the input and output bodies, and the associated DOFs. Note, it is critical here, that the joint&#39;s input coordinate is in body_in coordinate frame, and the output coordinate is in body_out coordinate frame.</span>
@@ -112,30 +118,43 @@
 <span class="sd">        body through the joint.</span>
 
 <span class="sd">        Updates the attribute values in place.</span>
+
+<span class="sd">        Diagram:</span>
+
+<span class="sd">        |  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀z2⠀⠀⠀⠀y2</span>
+<span class="sd">        |  ⠀⠀z1⠀⠀y1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀⠀⠀/</span>
+<span class="sd">        |  ⠀⠀⠀|⠀⠀/⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀p_j⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\\⠀/</span>
+<span class="sd">        |  ⠀⠀⠀|⠀/⠀⠀⠀⠀⠀_____----&gt;X-----_____⠀⠀⠀⠀\\/</span>
+<span class="sd">        |  ⠀⠀⠀|/....----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀-----&gt;O2----x2</span>
+<span class="sd">        |  ⠀⠀⠀O1-------x1⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀^G2</span>
+<span class="sd">        |  ⠀⠀⠀^G1</span>
+
+<span class="sd">        |  Thus, </span>
+<span class="sd">        |  p_O2 = r1 + R1 * (P_J/O1 + r2 + R2 * P_O2/J) = p_in + p_j_in + add_dof + p_out_j,</span>
+<span class="sd">        |  where</span>
+<span class="sd">        |  p_in: Global coordinate of COM of input link.</span>
+<span class="sd">        |  p_j_in: Rotated position of joint on input link.</span>
+<span class="sd">        |  p_out_j: Relative position of COM in global frame of output link wrt joint.</span>
+<span class="sd">        |  add_dof: Additional DOFs from joint, in the input link&#39;s coordinate Frame.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Apply the joint constraints to the output body. This defines</span>
+        <span class="c1"># the correct body position and orientation.</span>
         <span class="k">for</span> <span class="n">dof</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">dof</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dof</span><span class="o">.</span><span class="n">free</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">body_out</span><span class="o">.</span><span class="n">apply_constraint</span><span class="p">(</span><span class="n">dof</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">dof</span><span class="o">.</span><span class="n">const_value</span><span class="p">)</span>
 
-        <span class="c1"># TODO: draw a diagram to accompany this.</span>
-
         <span class="c1"># Propagate rotations from input body to output body</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">body_out</span><span class="o">.</span><span class="n">rot_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_in</span><span class="o">.</span><span class="n">rot_body</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_out</span><span class="o">.</span><span class="n">rot_body</span>
 
-        <span class="c1"># Get absolute positions</span>
-        <span class="c1"># Global coordinate of COM of input link</span>
+        <span class="c1"># Find the position of the output link&#39;s COM</span>
         <span class="n">p_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_in</span><span class="o">.</span><span class="n">pos_body</span>
-
-        <span class="c1"># Rotated position of joint on input link</span>
         <span class="n">p_j_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_in</span><span class="o">.</span><span class="n">rot_body</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">body_in_coord</span><span class="o">.</span><span class="n">symbols</span><span class="p">()</span>
-
-        <span class="c1"># Global position of COM of output link wrt joint</span>
         <span class="n">p_out_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_out</span><span class="o">.</span><span class="n">rot_body</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">body_out_coord</span><span class="o">.</span><span class="n">symbols</span><span class="p">()</span>
-
-        <span class="c1"># Additional DOFs from joint, in the input links coordinate Frame.</span>
         <span class="n">add_dof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_in</span><span class="o">.</span><span class="n">rot_body</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_out</span><span class="o">.</span><span class="n">pos_body</span>
 
-        <span class="c1"># The output links position is the sum of these 4 vectors</span>
+        <span class="c1"># The output link&#39;s position is the sum of these 4 vectors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">body_out</span><span class="o">.</span><span class="n">pos_body</span> <span class="o">=</span> <span class="n">p_in</span> <span class="o">+</span> <span class="n">p_j_in</span> <span class="o">+</span> <span class="n">p_out_j</span> <span class="o">+</span> <span class="n">add_dof</span></div>
 
 <div class="viewcode-block" id="Connection.draw"><a class="viewcode-back" href="../../../skydy.connectors.html#skydy.connectors.Connection.Connection.draw">[docs]</a>    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_vals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

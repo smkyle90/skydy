@@ -27,3 +27,6 @@ class MassMatrix:
     def as_mat(self):
         """Return the mass matrix as a sympy.matrix."""
         return self.__mat
+
+    def as_dict(self):
+        return {self.__mat[0, 0]: 1}
