@@ -4,7 +4,7 @@
 import pytest
 
 
-@pytest.mark.dev
+@pytest.mark.output
 def test_Arrow3D():
     import matplotlib.pyplot as plt
 

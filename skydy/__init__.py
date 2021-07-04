@@ -1,1 +1,9 @@
-from . import configuration, connectors, inertia, multibody, output, rigidbody
+from . import (
+    analysers,
+    configuration,
+    connectors,
+    inertia,
+    multibody,
+    output,
+    rigidbody,
+)
