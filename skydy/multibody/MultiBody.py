@@ -206,7 +206,7 @@ class MultiBody:
 
         """
         for body in self.bodies.values():
-            # Calculate the globl magnitude, direction and location of forces and torques
+            # Calculate the global magnitude, direction and location of forces and torques
             for F, P in body.linear_forces:
                 loc_force = body.pos_body + body.rot_body @ P.symbols()
                 dir_force = body.rot_body @ F.symbols()
