@@ -15,7 +15,7 @@ with os.scandir(path) as it:
 
 setuptools.setup(
     name="skydy",
-    version="0.0.2",
+    version="0.0.3",
     author="Scott Kyle",
     author_email="scott.m.kyle@gmail.com",
     description="A package to programmatically model inter-connected mechanical systems.",

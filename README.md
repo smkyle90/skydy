@@ -108,7 +108,7 @@ The guidelines for contributing are laid out here. All members of the team have 
 ### TODO
 What I want to get done:
 - [x] Documentation (Completed June 13, 2021. Docstrings added and infrastructure for Read The Docs & Sphinx autodocs. Release v0.0.2.)
-- [ ] Decent Documentation
+- [x] Decent Documentation (Release v0.0.3.)
 - [ ] Thorough Documentation
 - [ ] Prettier Latex printing
 - [ ] Add mass data to a Body for MassMatrix and InertiaMatrix objects
@@ -119,8 +119,8 @@ What I want to get done:
 - [ ] Rotating forces
 - [ ] Simulations
 - [ ] Systems analysis, including:
-    - [ ] Stability analysis
-    - [ ] Controllability (both Linear and Nonlinear)
+    - [x] Stability analysis (Release v0.0.3)
+    - [x] Controllability (both Linear and Nonlinear) (Release v0.0.3)
 - [ ] Control Design
 - [ ] Decrease the size of the Docker image
 - [ ] Add an image to Docker hub
